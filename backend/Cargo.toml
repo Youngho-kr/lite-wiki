@@ -1,0 +1,19 @@
+[package]
+name = "lite-wiki-backend"
+version = "0.1.0"
+edition = "2024"
+authors = ["Young"]
+
+[dependencies]
+# 비동기 런타임
+tokio = { version = "1.36", features = ["full"] }
+# 웹 서버 프레임워크
+axum = "0.7"
+# JSON 직렬화/역직렬화
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# 파일 시스템 기반 로깅
+tracing = "0.1"
+tracing-subscriber = "0.3"
+# markdwon HTML 변환
+pulldown-cmark = "0.9"
