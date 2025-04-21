@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  wiki:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lite-wiki
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/data:/lite-wiki/data
+    restart: unless-stopped
