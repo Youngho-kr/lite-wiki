@@ -2,7 +2,7 @@
 name = "lite-wiki-backend"
 version = "0.1.0"
 edition = "2024"
-authors = ["Young"]
+authors = ["Yyoung"]
 
 [dependencies]
 # 비동기 런타임
