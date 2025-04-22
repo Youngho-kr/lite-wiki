@@ -12,6 +12,7 @@ pub fn create_routes() -> Router {
         .route("/", get(redirect_to_index))
         .route("/docs", get(render_doc_list))
         .route("/templates", get(render_template_list))
+        .route("/search", get(render_search_results))
         .route("/:name", get(render_doc_html))
         .route("/edit/:name", get(edit_doc_page))
 }

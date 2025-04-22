@@ -4,7 +4,6 @@ use axum::{
 };
 use crate::storage::load_doc;
 use pulldown_cmark::{Parser, Options, html};
-use serde_json::to_string;
 
 pub async fn render_doc_html(Path(name): Path<String>) -> impl IntoResponse {
     match load_doc(&name) {
@@ -30,6 +29,7 @@ fn markdown_to_html(md: &str) -> String {
 }
 
 // Render HTML view page
+// Viewer page contains search and edit button
 fn render_viewer_page(name: &str, html: &str) -> String {
     format!(
         r#"
@@ -46,6 +46,7 @@ fn render_viewer_page(name: &str, html: &str) -> String {
                     justify-content: space-between;
                     align-items: center;
                     margin-bottom: 1.5rem;
+                    gap: 1rem;
                 }}
                 #edit-btn {{
                     background: #eee;
@@ -56,6 +57,11 @@ fn render_viewer_page(name: &str, html: &str) -> String {
                     color: #333;
                 }}
                 #edit-btn:hover {{ background: #ddd; }}
+                #search-form input {{
+                    padding: 4px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                }}
             </style>
         </head>
         <body>
@@ -63,6 +69,7 @@ fn render_viewer_page(name: &str, html: &str) -> String {
                 <h1>{name}</h1>
                 <a id="edit-btn" href="/edit/{name}">✏️ 수정</a>
             </div>
+
             <div id="viewer"></div>
 
             <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
@@ -74,11 +81,15 @@ fn render_viewer_page(name: &str, html: &str) -> String {
                     initialValue: markdownContent,
                 }});
             </script>
+            </br>
+            <form id="search-form" action="/search" method="get">
+                <input type="text" name="q" placeholder="문서 검색..." />
+            </form>
         </body>
         </html>
         "#,
         name = name,
-        escaped_json = to_string(html).unwrap()
+        escaped_json = serde_json::to_string(html).unwrap()
     )
 }
 
