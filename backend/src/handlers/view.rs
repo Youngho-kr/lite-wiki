@@ -2,14 +2,15 @@ use axum::{
     extract::Path, 
     response::{Html, IntoResponse, Redirect}
 };
-use crate::storage::load_doc;
+use crate::storage::{load_doc, load_doc_meta};
 use pulldown_cmark::{Parser, Options, html};
 
 pub async fn render_doc_html(Path(name): Path<String>) -> impl IntoResponse {
     match load_doc(&name) {
         Ok(md_content) => {
+            let meta = load_doc_meta(&name).unwrap_or_default();
             let html_output = markdown_to_html(&md_content);
-            Html(render_viewer_page(&name, &html_output)).into_response()
+            Html(render_viewer_page(&name, &html_output, &meta.tags)).into_response()
         }
         Err(_) => Redirect::to(&format!("/edit/{}", name)).into_response(),
     }
@@ -30,7 +31,13 @@ fn markdown_to_html(md: &str) -> String {
 
 // Render HTML view page
 // Viewer page contains search and edit button
-fn render_viewer_page(name: &str, html: &str) -> String {
+fn render_viewer_page(name: &str, html: &str, tags: &[String]) -> String {
+    let tag_links: String = tags
+        .iter()
+        .map(|tag| format!(r#"<a href="/tag/{}" class="tag">#{}</a>"#, tag, tag))
+        .collect::<Vec<_>>()
+        .join(" ");
+
     format!(
         r#"
         <!DOCTYPE html>
@@ -62,6 +69,22 @@ fn render_viewer_page(name: &str, html: &str) -> String {
                     border: 1px solid #ccc;
                     border-radius: 4px;
                 }}
+                #tags {{
+                    margin-bottom: 1rem;
+                }}
+                .tag {{
+                    display: inline-block;
+                    background-color: #f3f3f3;
+                    border-radius: 4px;
+                    padding: 2px 6px;
+                    margin-right: 6px;
+                    font-size: 0.9em;
+                    text-decoration: none;
+                    color: #0366d6;
+                }}
+                .tag:hover {{
+                    background-color: #e6e6e6;
+                }}
             </style>
         </head>
         <body>
@@ -69,6 +92,8 @@ fn render_viewer_page(name: &str, html: &str) -> String {
                 <h1>{name}</h1>
                 <a id="edit-btn" href="/edit/{name}">✏️ 수정</a>
             </div>
+
+            <div id="tags">{tag_links}</div>
 
             <div id="viewer"></div>
 
@@ -89,7 +114,8 @@ fn render_viewer_page(name: &str, html: &str) -> String {
         </html>
         "#,
         name = name,
-        escaped_json = serde_json::to_string(html).unwrap()
+        escaped_json = serde_json::to_string(html).unwrap(),
+        tag_links = tag_links
     )
 }
 
