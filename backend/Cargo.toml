@@ -19,3 +19,5 @@ tracing-subscriber = "0.3"
 pulldown-cmark = "0.9"
 # 현재 시간
 chrono = { version = "0.4", features = ["serde"] }
+# 변경내용 추적
+similar = "2"

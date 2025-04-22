@@ -2,6 +2,7 @@ use std::{fs, io};
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use chrono::Utc;
+use similar::{TextDiff, ChangeTag};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct DocMeta {
@@ -22,20 +23,28 @@ impl DocMeta {
                 timestamp: now,
                 editor: "anonymous".to_string(),
                 summary: summary.to_string(),
+                diff_summary: None
             }]
         }
     }
 
-    pub fn record_edit(&mut self, summary: &str) {
+    pub fn record_edit(&mut self, summary: &str, before: Option<&str>, after: Option<&str>) {
         let now = Utc::now().to_rfc3339();
         if self.created.is_none() {
             self.created = Some(now.clone());
         }
         self. updated = Some(now.clone());
+
+        let diff_summary = match (before, after) {
+            (Some(b), Some(a)) if b != a => Some(generate_diff(b, a)),
+            _ => None,
+        };
+
         self.history.push(EditLog { 
             timestamp: now, 
             editor: "annonymous".to_string(), 
-            summary: summary.to_string(), 
+            summary: summary.to_string(),
+            diff_summary: diff_summary,
         })
     }
 }
@@ -45,6 +54,7 @@ pub struct EditLog {
     pub timestamp: String,
     pub editor: String,
     pub summary: String,
+    pub diff_summary: Option<String>,
 }
 
 const DOC_DIR: &str = "./data/docs";
@@ -74,11 +84,16 @@ pub fn load_doc(name: &str) -> io::Result<String> {
 }
 
 pub fn save_doc_content(name: &str, content: &str) -> io::Result<()> {
+    let old = load_doc(name).unwrap_or_default();
+
+    if old == content {
+        return Ok(())
+    }
+
     fs::write(doc_path(name), content)?;
 
     let mut meta = load_doc_meta(name).unwrap_or_default();
-    meta.record_edit("save");
-
+    meta.record_edit("save", Some(&old), Some(content));
     save_doc_meta(name, &meta)
 }
 
@@ -111,4 +126,20 @@ pub fn save_doc_meta(name: &str, meta: &DocMeta) -> io::Result<()> {
 
 fn doc_meta_path(name: &str) -> PathBuf {
     PathBuf::from(format!("{}/{}.meta.json", DOC_DIR, name))
+}
+
+pub fn generate_diff(before: &str, after: &str) -> String {
+    let diff = TextDiff::from_lines(before, after);
+
+    let mut result = String::new();
+    for change in diff.iter_all_changes() {
+        let sign = match change.tag() {
+            ChangeTag::Delete => "- ",
+            ChangeTag::Insert => "+ ",
+            ChangeTag::Equal => "  ",
+        };
+        result.push_str(&format!("{}{}", sign, change));
+    }
+
+    result
 }
