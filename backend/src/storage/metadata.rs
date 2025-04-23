@@ -1,10 +1,9 @@
-use std::{fs, io};
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
 use chrono::Utc;
-use similar::{TextDiff, ChangeTag};
+use serde::{Serialize, Deserialize};
+use similar::{ChangeTag, TextDiff};
+use std::{io, fs};
 
-use crate::config::DATA_PATH;
+use crate::storage::*;
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct DocMeta {
@@ -59,66 +58,6 @@ pub struct EditLog {
     pub diff_summary: Option<String>,
 }
 
-pub fn list_doc_names() -> io::Result<Vec<String>> {
-    fs::create_dir_all(DATA_PATH.clone())?;
-    let entries = fs::read_dir(DATA_PATH.clone())?
-        .filter_map(|e| e.ok())
-        .filter_map(|e| {
-            let name = e.path().file_name()?.to_str()?.to_string();
-            if name.ends_with(".md") {
-                Some(name.trim_end_matches(".md").to_string())
-            } else {
-                None
-            }
-        })
-        .collect();
-    Ok(entries)
-}
-
-pub fn load_doc(name: &str) -> io::Result<String> {
-    let content = fs::read_to_string(doc_path(name))?;
-
-    load_doc_meta(name).ok();
-
-    Ok(content)
-}
-
-pub fn create_new_doc(name: &str, content: &str) -> io::Result<()> {
-    let path = doc_path(name);
-    if path.exists() {
-        return Err(io::Error::new(io::ErrorKind::AlreadyExists, "Document already exists"));
-    }
-
-    fs::write(&path, content)?;
-
-    let meta = DocMeta::new("create");
-    save_doc_meta(name, &meta)?;
-
-    Ok(())
-}
-
-pub fn edit_existing_doc(name: &str, new_content: &str) -> io::Result<()> {
-    let old_content = load_doc(name).unwrap_or_default();
-
-    if (old_content == new_content) {
-        return Ok(());
-    }
-
-    fs::write(doc_path(name), new_content)?;
-
-    let mut meta = load_doc_meta(name).unwrap_or_default();
-    meta.record_edit("save", Some(&old_content), Some(new_content));
-    save_doc_meta(name, &meta)
-}
-
-pub fn delete_doc_file(name: &str) -> std::io::Result<()> {
-    fs::remove_file(doc_path(name))
-}
-
-fn doc_path(name: &str) -> PathBuf {
-    PathBuf::from(format!("{}/{}.md", DATA_PATH.clone(), name))
-}
-
 pub fn load_doc_meta(name: &str) -> std::io::Result<DocMeta> {
     let path = doc_meta_path(name);
     if path.exists() {
@@ -136,10 +75,6 @@ pub fn save_doc_meta(name: &str, meta: &DocMeta) -> io::Result<()> {
     let path = doc_meta_path(name);
     let content = serde_json::to_string_pretty(meta)?;
     fs::write(path, content)
-}
-
-fn doc_meta_path(name: &str) -> PathBuf {
-    PathBuf::from(format!("{}/{}.meta.json", DATA_PATH.clone(), name))
 }
 
 pub fn generate_diff(before: &str, after: &str) -> String {

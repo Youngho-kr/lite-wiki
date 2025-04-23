@@ -5,8 +5,7 @@ use axum::{
     response::{Html, IntoResponse, Redirect}
 };
 use crate::handlers::html_render::*;
-use crate::storage::{load_doc, load_doc_meta};
-use crate::handlers::load_template;
+use crate::storage::{load_doc, load_doc_meta, load_template};
 
 use pulldown_cmark::{Parser, Options, html};
 
