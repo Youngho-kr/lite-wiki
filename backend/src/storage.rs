@@ -83,17 +83,31 @@ pub fn load_doc(name: &str) -> io::Result<String> {
     Ok(content)
 }
 
-pub fn save_doc_content(name: &str, content: &str) -> io::Result<()> {
-    let old = load_doc(name).unwrap_or_default();
-
-    if old == content {
-        return Ok(())
+pub fn create_new_doc(name: &str, content: &str) -> io::Result<()> {
+    let path = doc_path(name);
+    if path.exists() {
+        return Err(io::Error::new(io::ErrorKind::AlreadyExists, "Document already exists"));
     }
 
-    fs::write(doc_path(name), content)?;
+    fs::write(&path, content)?;
+
+    let meta = DocMeta::new("create");
+    save_doc_meta(name, &meta)?;
+
+    Ok(())
+}
+
+pub fn edit_existing_doc(name: &str, new_content: &str) -> io::Result<()> {
+    let old_content = load_doc(name).unwrap_or_default();
+
+    if (old_content == new_content) {
+        return Ok(());
+    }
+
+    fs::write(doc_path(name), new_content)?;
 
     let mut meta = load_doc_meta(name).unwrap_or_default();
-    meta.record_edit("save", Some(&old), Some(content));
+    meta.record_edit("save", Some(&old_content), Some(new_content));
     save_doc_meta(name, &meta)
 }
 

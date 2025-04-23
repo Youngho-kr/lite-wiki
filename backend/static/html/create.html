@@ -55,13 +55,17 @@
           return;
         }
 
-        await fetch("api/docs/" + encodeURIComponent(title), {
+        const res = await fetch("api/docs/" + encodeURIComponent(title), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: editor.getMarkdown() }),
         });
 
-        location.href = "/" + encodeURIComponent(title);
+        if (res.ok) {
+          location.href = "/" + encodeURIComponent(title);
+        } else {
+          alert("저장 실패");
+        }
       } catch (err) {
         alert("저장 실패");
         console.error(err);

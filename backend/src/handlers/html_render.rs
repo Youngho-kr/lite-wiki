@@ -68,6 +68,19 @@ pub fn render_create_html(content: &str) -> String {
         .replace("{html}", &serde_json::to_string(content).unwrap())
 }
 
+pub fn render_doc_list_html(doc_names: &mut [String]) -> String {
+    doc_names.sort();
+    let items = doc_names
+        .iter()
+        .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let template = load_template_file("doc_list.html").unwrap_or_default();
+
+    template.replace("{items}", &items)
+}
+
 fn render_tags(tags: &[String]) -> String {
     tags.iter()
         .map(|tag| format!(r#"<a href="/tag/{}" class="tag">#{}</a>"#, tag, tag))

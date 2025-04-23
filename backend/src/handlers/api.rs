@@ -31,8 +31,15 @@ pub async fn get_doc(Path(name): Path<String>) ->  impl IntoResponse {
     }
 }
 
-pub async fn save_doc(Path(name): Path<String>, Json(payload): Json<SaveDoc>) -> impl IntoResponse {
-    match save_doc_content(&name, &payload.content) {
+pub async fn create_doc(Path(name): Path<String>, Json(payload): Json<SaveDoc>) -> impl IntoResponse {
+    match create_new_doc(&name, &payload.content) {
+        Ok(_) => (StatusCode::OK, "Saved").into_response(),
+        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response(),
+    }
+}
+
+pub async fn edit_doc(Path(name): Path<String>, Json(payload): Json<SaveDoc>) -> impl IntoResponse {
+    match edit_existing_doc(&name, &payload.content) {
         Ok(_) => (StatusCode::OK, "Saved").into_response(),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response(),
     }
