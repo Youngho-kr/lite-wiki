@@ -45,6 +45,12 @@ pub async fn delete_doc(Path(name): Path<String>) -> impl IntoResponse {
     }
 }
 
+pub async fn check_doc_exists(Path(name): Path<String>) -> impl IntoResponse {
+    match load_doc(&name) {
+        Ok(_) => (StatusCode::OK).into_response(),
+        Err(_) => (StatusCode::NO_CONTENT).into_response(),
+    }
+}
 #[derive(Serialize, Deserialize)]
 pub struct TagUpdateRequest {
     tags: Vec<String>,

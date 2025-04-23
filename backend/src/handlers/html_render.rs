@@ -1,7 +1,4 @@
-use std::io;
 use crate::storage::*;
-
-use super::templates;
 
 pub fn render_viewer_html(name: &str, html: &str, tags: &[String], history: &[EditLog]) -> String {
     let tag_links = render_tags(tags);
@@ -48,11 +45,12 @@ pub fn render_search_no_input_html() -> String {
 
     template
 }
+
 pub fn render_template_list_html(template_names: &[String]) -> String {
     let items = template_names
         .iter()
         .map(|name| {
-            let link = format!("/edit/새문서?template={}", name);
+            let link = format!("/create?template={}", name);
             format!(r#"<li>{} — <a href="{}">이 템플릿으로 문서 만들기</a></li>"#, name, link)
         })
         .collect::<Vec<_>>()
@@ -61,6 +59,13 @@ pub fn render_template_list_html(template_names: &[String]) -> String {
     let template = load_template_file("template_list.html").unwrap_or_default();
 
     template.replace("{items}", &items)
+}
+
+pub fn render_create_html(content: &str) -> String {
+    let template = load_template_file("create.html").unwrap_or_default();
+
+    template
+        .replace("{html}", &serde_json::to_string(content).unwrap())
 }
 
 fn render_tags(tags: &[String]) -> String {

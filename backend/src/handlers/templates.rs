@@ -1,5 +1,5 @@
 use axum::response::Html;
-use std::fs;
+use std::{fs, path::PathBuf};
 use crate::handlers::render_template_list_html;
 
 pub async fn render_template_list() -> Html<String> {
@@ -14,4 +14,10 @@ pub async fn render_template_list() -> Html<String> {
     }
 
     Html(render_template_list_html(&names))
+}
+
+pub fn load_template(name: &str) -> std::io::Result<String> {
+    let mut path = PathBuf::from("data/templates");
+    path.push(format!("{name}.md"));
+    fs::read_to_string(path)
 }

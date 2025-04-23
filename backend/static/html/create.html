@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>새 문서 만들기</title>
+  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 720px;
+      margin: auto;
+      padding: 2rem;
+    }
+    #editor {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    input[type="text"] {
+      padding: 6px;
+      width: 100%;
+      font-size: 1.1rem;
+    }
+    button {
+      padding: 6px 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📄 새 문서 만들기</h1>
+  <input type="text" id="titleInput" placeholder="문서 제목 입력..." />
+  <div id="editor"></div>
+  <button id="saveBtn">💾 저장</button>
+
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script>
+    const editor = new toastui.Editor({
+      el: document.querySelector('#editor'),
+      height: '500px',
+      initialEditType: 'markdown',
+      previewStyle: 'vertical',
+      initialValue: {html},
+    });
+
+    document.querySelector('#saveBtn').addEventListener('click', async () => {
+      const title = document.querySelector('#titleInput').value.trim();
+      if (!title) {
+        alert("제목을 입력해주세요");
+        return;
+      }
+
+      try {
+        const check = await fetch("/api/docs/check/" + encodeURIComponent(title));
+        if (check.status === 200) {
+          alert("이미 존재하는 문서 제목입니다.");
+          return;
+        }
+
+        await fetch("api/docs/" + encodeURIComponent(title), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: editor.getMarkdown() }),
+        });
+
+        location.href = "/" + encodeURIComponent(title);
+      } catch (err) {
+        alert("저장 실패");
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
