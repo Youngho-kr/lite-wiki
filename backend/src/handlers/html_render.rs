@@ -1,4 +1,7 @@
+use std::io;
 use crate::storage::*;
+
+use super::templates;
 
 pub fn render_viewer_html(name: &str, html: &str, tags: &[String], history: &[EditLog]) -> String {
     let tag_links = render_tags(tags);
@@ -18,6 +21,46 @@ pub fn render_editor_html(name: &str, html: &str) -> String {
     template
         .replace("{name}", name)
         .replace("{html}", html)
+}
+
+pub fn render_search_result_html(keyword: &str, results: &[String]) -> String {
+    let items: String = results
+        .iter()
+        .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
+        .collect();
+
+    let template = load_template_file("search_result.html").unwrap_or_default();
+
+    template
+        .replace("{keyword}", keyword)
+        .replace("{results}", &items)
+}
+
+pub fn render_search_empty_html(keyword: &str) -> String {
+    let template = load_template_file("search_empty.html").unwrap_or_default();
+
+    template
+        .replace("{keyword}", keyword)
+}
+
+pub fn render_search_no_input_html() -> String {
+    let template = load_template_file("search_no_input.html").unwrap_or_default();
+
+    template
+}
+pub fn render_template_list_html(template_names: &[String]) -> String {
+    let items = template_names
+        .iter()
+        .map(|name| {
+            let link = format!("/edit/새문서?template={}", name);
+            format!(r#"<li>{} — <a href="{}">이 템플릿으로 문서 만들기</a></li>"#, name, link)
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let template = load_template_file("template_list.html").unwrap_or_default();
+
+    template.replace("{items}", &items)
 }
 
 fn render_tags(tags: &[String]) -> String {

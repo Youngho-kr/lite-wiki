@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>🔍 문서 검색</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 720px;
+            margin: auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        input {
+            padding: 6px 12px;
+            font-size: 1rem;
+            width: 60%;
+            max-width: 300px;
+        }
+        button {
+            padding: 6px 12px;
+            font-size: 1rem;
+            margin-left: 0.5rem;
+        }
+        #notice {
+            background: #ffe4e1;
+            color: #b00020;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="notice">⚠️ 검색어를 입력해주세요</div>
+    <h1>🔍 문서 검색</h1>
+    <form action="/search" method="get">
+        <input type="text" name="q" placeholder="검색어 입력..." autofocus />
+        <button type="submit">검색</button>
+    </form>
+    <p><a href="/docs">← 전체 문서 보기</a></p>
+
+    <script>
+        const notice = document.getElementById("notice");
+    </script>
+</body>
+</html>
