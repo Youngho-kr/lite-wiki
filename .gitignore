@@ -19,3 +19,8 @@ target/
 # Docs
 data/
 
+# env
+.env
+
+# MacOS
+.DS_Store
