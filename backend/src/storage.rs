@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use chrono::Utc;
 use similar::{TextDiff, ChangeTag};
 
+use crate::config::DATA_PATH;
+
 #[derive(Serialize, Deserialize, Default)]
 pub struct DocMeta {
     pub tags: Vec<String>,
@@ -57,11 +59,9 @@ pub struct EditLog {
     pub diff_summary: Option<String>,
 }
 
-const DOC_DIR: &str = "./data/docs";
-
 pub fn list_doc_names() -> io::Result<Vec<String>> {
-    fs::create_dir_all(DOC_DIR)?;
-    let entries = fs::read_dir(DOC_DIR)?
+    fs::create_dir_all(DATA_PATH.clone())?;
+    let entries = fs::read_dir(DATA_PATH.clone())?
         .filter_map(|e| e.ok())
         .filter_map(|e| {
             let name = e.path().file_name()?.to_str()?.to_string();
@@ -102,7 +102,7 @@ pub fn delete_doc_file(name: &str) -> std::io::Result<()> {
 }
 
 fn doc_path(name: &str) -> PathBuf {
-    PathBuf::from(format!("{}/{}.md", DOC_DIR, name))
+    PathBuf::from(format!("{}/{}.md", DATA_PATH.clone(), name))
 }
 
 pub fn load_doc_meta(name: &str) -> std::io::Result<DocMeta> {
@@ -125,7 +125,7 @@ pub fn save_doc_meta(name: &str, meta: &DocMeta) -> io::Result<()> {
 }
 
 fn doc_meta_path(name: &str) -> PathBuf {
-    PathBuf::from(format!("{}/{}.meta.json", DOC_DIR, name))
+    PathBuf::from(format!("{}/{}.meta.json", DATA_PATH.clone(), name))
 }
 
 pub fn generate_diff(before: &str, after: &str) -> String {

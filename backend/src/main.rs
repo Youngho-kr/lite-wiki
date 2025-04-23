@@ -1,13 +1,21 @@
 mod routes;
 mod handlers;
 mod storage;
+mod utils;
+mod config;
 
 use tokio::net::TcpListener;
 use tracing_subscriber;
+use dotenv::dotenv;
+
 use routes::create_routes;
+use utils::check_environment_directories;
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+    check_environment_directories();
+
     tracing_subscriber::fmt::init();
 
     let app = create_routes();
