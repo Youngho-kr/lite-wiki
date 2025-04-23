@@ -34,6 +34,13 @@
       initialValue: markdownContent,
     });
 
+    editor.on('change', () => {
+      const content = editor.getMarkdown();
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(content);
+      }
+    });
+
     document.querySelector('#saveBtn').addEventListener('click', () => {
       fetch("/api/docs/" + pageName, {
         method: "POST",
@@ -46,4 +53,11 @@
     });
   </script>
 </body>
+<script>
+  const socket = new WebSocket("ws://" + location.host + "/ws/" + pageName);
+  socket.onmessage = (event) => {
+      const msg = event.data;
+      console.log("실시간 수신:", msg);
+  };
+  </script>
 </html>
