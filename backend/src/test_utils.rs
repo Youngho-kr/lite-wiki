@@ -43,3 +43,11 @@ pub fn clear_test_doc(title: &str) {
     let _ = fs::remove_file(doc_path);
     let _ = fs::remove_file(meta_path);
 }
+
+pub fn clear_test_template(title: &str) {
+    let base = env::var("TEMPLATE_PATH").expect("Missing TEMPLATE_PATH");
+
+    let template_path = PathBuf::from(format!("{}/{}.md", base, title));
+
+    let _ = fs::remove_file(template_path);
+}
