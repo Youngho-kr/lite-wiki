@@ -34,7 +34,7 @@ pub fn create_new_doc(name: &str, content: &str) -> io::Result<()> {
 
     fs::write(&path, content)?;
 
-    let meta = DocMeta::new("create");
+    let meta = DocMeta::new();
     save_doc_meta(name, &meta)?;
 
     Ok(())
@@ -123,6 +123,22 @@ mod tests {
         let meta = load_doc_meta(title).unwrap();
         assert_eq!(meta.history.len(), 2);
         assert_eq!(meta.history.last().unwrap().summary, "save");
+    }
+
+    #[test]
+    fn test_edit_existing_doc_no_diff() {
+        setup_test_env();
+
+        let title = "test_edit_existing_doc_no_diff";
+        let content = "Hello world";
+
+        clear_test_doc(title);
+
+        create_new_doc(title, content).unwrap();
+        assert!(edit_existing_doc(title, content).is_ok());
+
+        let meta = load_doc_meta(title).unwrap();
+        assert_eq!(meta.history.len(), 1);
     }
 
     #[test]
