@@ -57,3 +57,52 @@ pub fn edit_existing_doc(name: &str, new_content: &str) -> io::Result<()> {
 pub fn delete_doc_file(name: &str) -> std::io::Result<()> {
     fs::remove_file(doc_path(name))
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use crate::test_utils::{clear_test_docs, setup_test_env};
+
+    use super::*;
+    use std::fs;
+
+    fn cleanup(name: &str) {
+        let _ = delete_doc_file(name);
+        let _ = fs::remove_file(crate::storage::path::doc_meta_path(name));
+    }
+
+    #[test]
+    fn test_create_edit_load_delete_doc() {
+        setup_test_env();
+        clear_test_docs();
+
+        let name = "test_module_doc";
+        let content1 = "Hello, world!";
+        let content2 = "Updated content!";
+
+        cleanup(name);
+        
+        // create
+        create_new_doc(name, content1).expect("create failed");
+        
+        // load
+        let loaded = load_doc(name).expect("load failed");
+        assert_eq!(loaded, content1);
+
+        // edit
+        edit_existing_doc(name, content2).expect("edit failed");
+        let edited = load_doc(name).expect("load after edit failed");
+        assert_eq!(edited, content2);
+
+        // list
+        let list = list_doc_names().expect("list failed");
+        assert!(list.contains(&name.to_string()));
+
+        // delete
+        delete_doc_file(name).expect("delete failed");
+        assert!(!doc_path(name).exists());
+
+        cleanup(name);
+    }
+}

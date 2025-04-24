@@ -1,6 +1,6 @@
 use tokio::net::TcpListener;
 use tracing_subscriber;
-use dotenv::dotenv;
+use dotenvy::dotenv;
 
 use lite_wiki_backend::routes::create_routes;
 use lite_wiki_backend::utils::check_environment_directories;
