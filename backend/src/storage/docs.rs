@@ -62,7 +62,7 @@ pub fn delete_doc_file(name: &str) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_utils::{setup_test_env, remove_test_doc};
+    use crate::test_utils::{setup_test_env, clear_test_doc};
 
     use super::*;
     use std::fs;
@@ -74,7 +74,7 @@ mod tests {
         let title = "create_new_doc_success";
         let content = "This is LiteWiki!";
 
-        remove_test_doc(title);
+        clear_test_doc(title);
 
         assert!(create_new_doc(title, content).is_ok());
 
@@ -96,7 +96,7 @@ mod tests {
         let original = "This is LiteWiki!";
         let updated = "Is this LiteWiki?";
 
-        remove_test_doc(title);
+        clear_test_doc(title);
 
         assert!(create_new_doc(title, original).is_ok());
         let result = create_new_doc(title, updated);
@@ -111,7 +111,7 @@ mod tests {
         let original = "Original content";
         let updated = "Updated content";
 
-        remove_test_doc(title);
+        clear_test_doc(title);
 
         create_new_doc(title, original).unwrap();
         let result = edit_existing_doc(title, updated);
@@ -132,7 +132,7 @@ mod tests {
         let title = "test_delete_doc";
         let content = "Content";
 
-        remove_test_doc(title);
+        clear_test_doc(title);
         
         create_new_doc(title, content).unwrap();
         
@@ -147,7 +147,7 @@ mod tests {
         let title = "test_load_doc";
         let content = "test load doc";
 
-        remove_test_doc(title);
+        clear_test_doc(title);
 
         create_new_doc(title, content).unwrap();
 
@@ -161,7 +161,7 @@ mod tests {
         let title = "test_list_doc_names";
         let content = "checking file in list";
 
-        remove_test_doc(title);
+        clear_test_doc(title);
         create_new_doc(title, content).unwrap();
 
         let names = list_doc_names().unwrap();

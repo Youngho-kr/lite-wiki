@@ -31,7 +31,7 @@ pub fn clear_test_docs() {
 
 use std::path::PathBuf;
 
-pub fn remove_test_doc(title: &str) {
+pub fn clear_test_doc(title: &str) {
     // 환경 변수에서 DATA_PATH 가져오기
     let base = env::var("DATA_PATH").expect("Missing DATA_PATH");
 
