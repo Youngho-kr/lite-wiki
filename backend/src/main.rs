@@ -1,15 +1,9 @@
-mod routes;
-mod handlers;
-mod storage;
-mod utils;
-mod config;
-
 use tokio::net::TcpListener;
 use tracing_subscriber;
 use dotenv::dotenv;
 
-use routes::create_routes;
-use utils::check_environment_directories;
+use lite_wiki_backend::routes::create_routes;
+use lite_wiki_backend::utils::check_environment_directories;
 
 #[tokio::main]
 async fn main() {
