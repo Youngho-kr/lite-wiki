@@ -18,9 +18,11 @@ target/
 
 # Docs
 data/
+data_test/
 
 # env
 .env
+.env.test
 
 # MacOS
 .DS_Store
