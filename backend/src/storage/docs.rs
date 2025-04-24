@@ -62,47 +62,109 @@ pub fn delete_doc_file(name: &str) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_utils::{clear_test_docs, setup_test_env};
+    use crate::test_utils::{setup_test_env, remove_test_doc};
 
     use super::*;
     use std::fs;
 
-    fn cleanup(name: &str) {
-        let _ = delete_doc_file(name);
-        let _ = fs::remove_file(crate::storage::path::doc_meta_path(name));
+    #[test]
+    fn test_create_new_doc_success() {
+        setup_test_env();
+
+        let title = "create_new_doc_success";
+        let content = "This is LiteWiki!";
+
+        remove_test_doc(title);
+
+        assert!(create_new_doc(title, content).is_ok());
+
+        let path = doc_path(title);
+        assert!(path.exists());
+
+        let saved = fs::read_to_string(path).unwrap();
+        assert_eq!(saved, content);
+
+        let meta = load_doc_meta(title).unwrap_or_default();
+        assert_eq!(meta.history.last().unwrap().summary, "create");
     }
 
     #[test]
-    fn test_create_edit_load_delete_doc() {
+    fn test_create_new_doc_exists_fail() {
         setup_test_env();
-        clear_test_docs();
 
-        let name = "test_module_doc";
-        let content1 = "Hello, world!";
-        let content2 = "Updated content!";
+        let title = "create_exists_doc_fail";
+        let original = "This is LiteWiki!";
+        let updated = "Is this LiteWiki?";
 
-        cleanup(name);
+        remove_test_doc(title);
+
+        assert!(create_new_doc(title, original).is_ok());
+        let result = create_new_doc(title, updated);
+        assert!(matches!(result, Err(e) if e.kind() == io::ErrorKind::AlreadyExists));
+    }
+
+    #[test]
+    fn test_edit_existing_doc_success() {
+        setup_test_env();
+
+        let title = "test_edit_doc";
+        let original = "Original content";
+        let updated = "Updated content";
+
+        remove_test_doc(title);
+
+        create_new_doc(title, original).unwrap();
+        let result = edit_existing_doc(title, updated);
+        assert!(result.is_ok());
+
+        let saved = fs::read_to_string(doc_path(title)).unwrap();
+        assert_eq!(saved, updated);
+
+        let meta = load_doc_meta(title).unwrap();
+        assert_eq!(meta.history.len(), 2);
+        assert_eq!(meta.history.last().unwrap().summary, "save");
+    }
+
+    #[test]
+    fn test_delete_doc_success() {
+        setup_test_env();
+
+        let title = "test_delete_doc";
+        let content = "Content";
+
+        remove_test_doc(title);
         
-        // create
-        create_new_doc(name, content1).expect("create failed");
+        create_new_doc(title, content).unwrap();
         
-        // load
-        let loaded = load_doc(name).expect("load failed");
-        assert_eq!(loaded, content1);
+        assert!(delete_doc_file(title).is_ok());
+        assert!(!doc_path(title).exists());
+    }
 
-        // edit
-        edit_existing_doc(name, content2).expect("edit failed");
-        let edited = load_doc(name).expect("load after edit failed");
-        assert_eq!(edited, content2);
+    #[test]
+    fn test_load_doc_success() {
+        setup_test_env();
 
-        // list
-        let list = list_doc_names().expect("list failed");
-        assert!(list.contains(&name.to_string()));
+        let title = "test_load_doc";
+        let content = "test load doc";
 
-        // delete
-        delete_doc_file(name).expect("delete failed");
-        assert!(!doc_path(name).exists());
+        remove_test_doc(title);
 
-        cleanup(name);
+        create_new_doc(title, content).unwrap();
+
+        let loaded = load_doc(title).unwrap();
+        assert_eq!(content, loaded);
+    }
+
+    #[test]
+    fn test_list_doc_names_returns_created_file() {
+        setup_test_env();
+        let title = "test_list_doc_names";
+        let content = "checking file in list";
+
+        remove_test_doc(title);
+        create_new_doc(title, content).unwrap();
+
+        let names = list_doc_names().unwrap();
+        assert!(names.contains(&title.to_string()));
     }
 }
