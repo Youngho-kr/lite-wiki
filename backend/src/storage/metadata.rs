@@ -14,7 +14,7 @@ pub struct DocMeta {
 }
 
 impl DocMeta {
-    pub fn new(summary: &str) -> Self {
+    pub fn new() -> Self {
         let now = Utc::now().to_rfc3339();
         Self {
             tags: Vec::new(),
@@ -23,7 +23,7 @@ impl DocMeta {
             history: vec![EditLog {
                 timestamp: now,
                 editor: "anonymous".to_string(),
-                summary: summary.to_string(),
+                summary: "create".to_string(),
                 diff_summary: None
             }]
         }
@@ -65,7 +65,7 @@ pub fn load_doc_meta(name: &str) -> std::io::Result<DocMeta> {
         let meta = serde_json::from_str(&content)?;
         Ok(meta)
     } else {
-        let meta = DocMeta::new("create");
+        let meta = DocMeta::new();
         save_doc_meta(name, &meta)?;
         Ok(meta)
     }
@@ -91,4 +91,62 @@ pub fn generate_diff(before: &str, after: &str) -> String {
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_utils::{setup_test_env, clear_test_doc};
+
+    #[test]
+    fn test_docmeta_new() {
+        let meta = DocMeta::new();
+
+        assert!(meta.created.is_some());
+        assert!(meta.updated.is_some());
+        assert_eq!(meta.created, meta.updated);
+        assert_eq!(meta.history.len(), 1);
+        assert_eq!(meta.history[0].summary, "create");
+    }
+
+    #[test]
+    fn test_save_and_load_meta() {
+        setup_test_env();
+
+        let title = "test_save_and_load_meta";
+        clear_test_doc(title);
+
+        let mut meta = DocMeta::new();
+        meta.tags.push("test".to_string());
+
+        save_doc_meta(title, &meta).unwrap();
+        let loaded = load_doc_meta(title).unwrap();
+
+        assert_eq!(loaded.tags, vec!["test"]);
+        assert_eq!(loaded.history.len(), 1);
+    }
+
+    #[test]
+    fn test_generate_diff() {
+        let before = "Hello\nWorld";
+        let after = "Hello\nLiteWiki";
+        let diff = generate_diff(before, after);
+
+        assert!(diff.contains("- World"));
+        assert!((diff.contains("+ LiteWiki")));
+    }
+
+    #[test]
+    fn test_record_edit() {
+        let mut meta = DocMeta::new();
+        let before = "Old content";
+        let after = "New content";
+
+        meta.record_edit("edit", Some(before), Some(after));
+
+        assert_eq!(meta.history.len(), 2);
+
+        let last = meta.history.last().unwrap();
+        assert_eq!(last.summary, "edit");
+    } 
 }
