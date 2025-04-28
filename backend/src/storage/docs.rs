@@ -1,4 +1,4 @@
-use std::{io, fs};
+use std::{collections::HashSet, fs, io};
 use crate::storage::*;
 
 // 문서 본문 로드 및 저장
@@ -72,6 +72,22 @@ pub fn find_docs_by_tag(tag: &str) -> io::Result<Vec<String>> {
     Ok(matched)
 }
 
+pub fn list_all_tags() -> io::Result<Vec<String>> {
+    let names = list_doc_names().unwrap_or_default();
+    let mut tag_set = HashSet::new();
+
+    for name in names {
+        if let Ok(meta) = load_doc_meta(&name) {
+            for tag in meta.tags {
+                tag_set.insert(tag);
+            }
+        }
+    }
+
+    let mut tags: Vec<_> = tag_set.into_iter().collect();
+    tags.sort();
+    Ok(tags)
+}
 
 #[cfg(test)]
 mod tests {

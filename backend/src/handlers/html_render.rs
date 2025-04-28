@@ -98,6 +98,16 @@ pub fn render_search_tag_html(tag: &str, docs: &mut [String]) -> String {
         .replace("{items}", &items)
 }
 
+pub fn render_all_tags_html(tags: &[String]) -> String {
+    let items = tags.iter()
+        .map(|tag| format!(r#"<li><a href="/tags/{}" class="tag">#{}</a></li>"#, tag, tag))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let template = load_template_file("tag_list.html").unwrap_or_default();
+    template.replace("{items}", &items)
+}
+
 fn render_viewer_tags(tags: &[String]) -> String {
     tags.iter()
         .map(|tag| format!(r#"<a href="/tag/{}" class="tag">#{}</a>"#, tag, tag))

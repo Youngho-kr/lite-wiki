@@ -19,5 +19,6 @@ pub fn create_routes() -> Router {
         .route("/create", get(create_doc_page))
         .route("/edit/:name", get(edit_doc_page))
         .route("/:name", get(render_doc_page))
+        .route("/tags", get(render_all_tags))
         .route("/tag/:name", get(render_search_tags))
 }
