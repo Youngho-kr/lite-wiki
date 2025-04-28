@@ -36,7 +36,7 @@
 
     document.querySelector('#saveBtn').addEventListener('click', () => {
       fetch("/api/docs/" + pageName, {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: editor.getMarkdown() }),
       }).then(() => {
