@@ -58,6 +58,19 @@ pub fn delete_doc_file(name: &str) -> std::io::Result<()> {
     fs::remove_file(doc_path(name))
 }
 
+pub fn find_docs_by_tag(tag: &str) -> io::Result<Vec<String>> {
+    let mut matched = vec![];
+
+    for name in list_doc_names()? {
+        if let Ok(meta) = load_doc_meta(&name) {
+            if meta.tags.contains(&tag.to_string()) {
+                matched.push(name);
+            }
+        }
+    }
+
+    Ok(matched)
+}
 
 
 #[cfg(test)]

@@ -84,6 +84,20 @@ pub fn render_doc_list_html(doc_names: &mut [String]) -> String {
     template.replace("{items}", &items)
 }
 
+pub fn render_search_tag_html(tag: &str, docs: &mut [String]) -> String {
+    docs.sort();
+    let items = docs.iter()
+        .map(|doc| format!(r#"<li><a href="/{}">{}</a></li>"#, doc, doc))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let template = load_template_file("search_tag.html").unwrap_or_default();
+
+    template
+        .replace("{tag}", tag)
+        .replace("{items}", &items)
+}
+
 fn render_viewer_tags(tags: &[String]) -> String {
     tags.iter()
         .map(|tag| format!(r#"<a href="/tag/{}" class="tag">#{}</a>"#, tag, tag))

@@ -5,7 +5,7 @@ use axum::{
     response::{Html, IntoResponse, Redirect}
 };
 use crate::handlers::html_render::*;
-use crate::storage::{load_doc, load_doc_meta, load_template};
+use crate::storage::{load_doc, load_doc_meta, load_template, find_docs_by_tag};
 
 use pulldown_cmark::{html, Options, Parser};
 
@@ -40,6 +40,13 @@ pub async fn create_doc_page(Query(params): Query<HashMap<String, String>>) -> H
         .unwrap_or_default();
 
     Html(render_create_html(&title, &content))
+}
+
+pub async fn render_search_tags(Path(tag_name): Path<String>) -> impl IntoResponse {
+    match find_docs_by_tag(&tag_name) {
+        Ok(mut matched_docs) => Html(render_search_tag_html(&tag_name, &mut matched_docs)).into_response(),
+        Err(_) => Html("<h1>문서 목록 불러오기 실패</h1>".to_string()).into_response(),
+    }
 }
 
 fn markdown_to_html(md: &str) -> String {
