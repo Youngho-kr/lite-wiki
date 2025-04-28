@@ -14,10 +14,46 @@
     #editor {
       margin-bottom: 1rem;
     }
+    #tags-area {
+      margin-bottom: 1rem;
+    }
+    .tag {
+      display: inline-block;
+      background: #f3f3f3;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin-right: 6px;
+      font-size: 0.9rem;
+      color: #333;
+      position: relative;
+    }
+    .tag .remove-tag {
+      margin-left: 6px;
+      color: red;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #add-tag-btn {
+      background: #ddd;
+      border: none;
+      padding: 4px 8px;
+      margin-top: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #add-tag-btn:hover {
+      background: #ccc;
+    }
   </style>
 </head>
 <body>
   <h1>Editing: {name}</h1>
+
+  <div id="tags-area">
+    <div id="tags">{tags}</div>
+    <button id="add-tag-btn">➕ 태그 추가</button>
+  </div>
+
   <div id="editor"></div>
   <button id="saveBtn">💾 저장</button>
 
@@ -34,15 +70,73 @@
       initialValue: markdownContent,
     });
 
-    document.querySelector('#saveBtn').addEventListener('click', () => {
-      fetch("/api/docs/" + pageName, {
+    // 태그 관련 로직
+    const tagsDiv = document.getElementById("tags");
+    document.getElementById("add-tag-btn").addEventListener("click", () => {
+      const tagInput = document.createElement("input");
+      tagInput.type = "text";
+      tagInput.placeholder = "새 태그 입력 후 Enter";
+      tagInput.style.marginRight = "6px";
+      tagsDiv.appendChild(tagInput);
+      tagInput.focus();
+
+      tagInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && tagInput.value.trim() !== "") {
+          e.preventDefault();
+          addTag(tagInput.value.trim());
+          tagsDiv.removeChild(tagInput);
+        }
+      });
+
+      tagInput.addEventListener("blur", () => {
+        tagsDiv.removeChild(tagInput);
+      });
+    });
+
+    function addTag(name) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "#" + name;
+
+      const removeBtn = document.createElement("span");
+      removeBtn.className = "remove-tag";
+      removeBtn.textContent = "×";
+      removeBtn.onclick = () => tag.remove();
+
+      tag.appendChild(removeBtn);
+      tagsDiv.appendChild(tag);
+    }
+
+    function collectTags() {
+      return Array.from(tagsDiv.getElementsByClassName("tag"))
+          .map(tag => tag.firstChild.textContent.slice(1)); // '#' 제외
+    }
+
+    document.querySelectorAll('.remove-tag').forEach(btn => {
+      btn.addEventListener('click', () => {
+          btn.parentElement.remove();
+      });
+    });
+
+    // 저장 버튼
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const tags = collectTags();
+      const content = editor.getMarkdown();
+
+      await fetch("/api/docs/" + encodeURIComponent(pageName), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: editor.getMarkdown() }),
-      }).then(() => {
-        alert("저장 완료!");
-        location.href = "/" + pageName;
+        body: JSON.stringify({ content }),
       });
+
+      await fetch("/api/tags/" + encodeURIComponent(pageName), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tags }),
+      });
+
+      alert("저장 완료!");
+      location.href = "/" + encodeURIComponent(pageName);
     });
   </script>
 </body>

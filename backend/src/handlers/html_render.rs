@@ -1,7 +1,7 @@
 use crate::storage::*;
 
 pub fn render_viewer_html(name: &str, html: &str, tags: &[String], history: &[EditLog]) -> String {
-    let tag_links = render_tags(tags);
+    let tag_links = render_viewer_tags(tags);
     let history_html = render_history_section(history);
     let template = load_template_file("viewer.html").unwrap_or_default();
 
@@ -12,12 +12,14 @@ pub fn render_viewer_html(name: &str, html: &str, tags: &[String], history: &[Ed
         .replace("{history_section}", &history_html)
 }
 
-pub fn render_editor_html(name: &str, html: &str) -> String {
+pub fn render_editor_html(name: &str, html: &str, tags: &[String]) -> String {
     let template = load_template_file("editor.html").unwrap_or_default();
+    let tag_links = render_editor_tags(tags);
 
     template
         .replace("{name}", name)
         .replace("{html}", html)
+        .replace("{tags}", &tag_links)
 }
 
 pub fn render_search_result_html(keyword: &str, results: &[String]) -> String {
@@ -81,9 +83,16 @@ pub fn render_doc_list_html(doc_names: &mut [String]) -> String {
     template.replace("{items}", &items)
 }
 
-fn render_tags(tags: &[String]) -> String {
+fn render_viewer_tags(tags: &[String]) -> String {
     tags.iter()
         .map(|tag| format!(r#"<a href="/tag/{}" class="tag">#{}</a>"#, tag, tag))
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn render_editor_tags(tags: &[String]) -> String {
+    tags.iter()
+        .map(|tag| format!(r#"<span class="tag">#{tag}<span class="remove-tag">×</span></span>"#))
         .collect::<Vec<_>>()
         .join(" ")
 }
