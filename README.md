@@ -1,5 +1,5 @@
 # Lite Wiki
-> **Lite Wiki**는 Rust로 작성한 웹 기반 마크다운 위키 시스템입니다.
+> **Lite Wiki**는 Rust로 작성한 경량화 마크다운 기반 웹 위키 시스템입니다.
 - 백엔드: Rust
 - 에디터: Toast UI Editor
 - 데이터 저장: 로컬 파일 시스템 (.md)
@@ -14,11 +14,12 @@
 ```
 lite-wiki/
 ├── backend/            # Rust 서버 소스코드 및 Dockerfile
+│   ├── src/
+│   ├── static/         # HTML 파일
 │   ├── Cargo.lock
 │   ├── Cargo.toml
 │   ├── Dockerfile
-│   ├── src
-│   └── static          # HTML 파일
+│   └── .env
 ├── data/               # 문서 및 템플릿 디렉토리
 ├── docker/             # 배포 관련 설정 파일 (예정)
 ├── docker-compose.yml  # 실행 환경 정의
@@ -26,14 +27,17 @@ lite-wiki/
 ```
 
 ## 시작
-
+### 환경 변수 설정
+```
+# .env
+DATA_PATH=./data/docs
+TEMPLATE_PATH=./data/templates
+```
 ### Docker 배포
 ```
 docker build -t litewiki .
 docker run -d -p 3000:3000 --name litewiki_app litewiki
 ```
-
-
 
 ## 웹 접속 (수정 예정)
 http://localhost:3000
