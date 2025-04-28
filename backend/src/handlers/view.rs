@@ -7,7 +7,7 @@ use axum::{
 use crate::handlers::html_render::*;
 use crate::storage::{load_doc, load_doc_meta, load_template};
 
-use pulldown_cmark::{Parser, Options, html};
+use pulldown_cmark::{html, Options, Parser};
 
 pub async fn render_doc_page(Path(name): Path<String>) -> impl IntoResponse {
     match load_doc(&name) {
@@ -16,23 +16,30 @@ pub async fn render_doc_page(Path(name): Path<String>) -> impl IntoResponse {
             let html_output = markdown_to_html(&md_content);
             Html(render_viewer_html(&name, &html_output, &meta.tags, &meta.history)).into_response()
         }
-        Err(_) => Redirect::to(&format!("/edit/{}", name)).into_response(),
+        Err(_) => Redirect::to(&format!("/create?title={}", name)).into_response(),
     }
 }
 
-pub async fn edit_doc_page(name: Path<String>,) -> Html<String> {
-    let content = load_doc(&name).unwrap_or_default(); // 없으면 빈 문서
-    let escaped = serde_json::to_string(&content).unwrap(); // JS에서 안전하게 쓸 수 있도록 escape
-    Html(render_editor_html(&name, &escaped))
+pub async fn edit_doc_page(Path(name): Path<String>,) -> impl IntoResponse {
+    match load_doc(&name) {
+        Ok(md_content) => {
+            let meta = load_doc_meta(&name).unwrap_or_default();
+            let escaped = serde_json::to_string(&md_content).unwrap();
+            Html(render_editor_html(&name, &escaped, &meta.tags)).into_response()
+        }
+        Err(_) => Redirect::to(&format!("/create?title={}", name)).into_response(),
+    }
 }
 
 pub async fn create_doc_page(Query(params): Query<HashMap<String, String>>) -> Html<String> {
+    let title = params.get("title").cloned().unwrap_or_default();
+
     let content = params
         .get("template")
         .and_then(|tpl| load_template(tpl).ok())
         .unwrap_or_default();
 
-    Html(render_create_html(&content))
+    Html(render_create_html(&title, &content))
 }
 
 fn markdown_to_html(md: &str) -> String {

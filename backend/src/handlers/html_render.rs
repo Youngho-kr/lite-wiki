@@ -63,10 +63,11 @@ pub fn render_template_list_html(template_names: &[String]) -> String {
     template.replace("{items}", &items)
 }
 
-pub fn render_create_html(content: &str) -> String {
+pub fn render_create_html(title: &str, content: &str) -> String {
     let template = load_template_file("create.html").unwrap_or_default();
 
     template
+        .replace("{title}", title)
         .replace("{html}", &serde_json::to_string(content).unwrap())
 }
 
