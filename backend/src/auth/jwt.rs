@@ -1,7 +1,7 @@
 use axum::{
-    http::{Request, StatusCode},
+    http::{HeaderMap, Request, StatusCode},
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Redirect, Response},
 };
 use headers::HeaderMapExt;
 use headers::Cookie as HeaderCookie;
@@ -41,8 +41,18 @@ pub fn decode_jwt(token: &str) -> Result<String, JwtError> {
     Ok(data.claims.sub)
 }
 
-pub async fn require_jwt(req: Request<axum::body::Body>, next: Next) -> Result<Response, StatusCode> {
+pub fn build_jwt_cookie(token: &str) -> Cookie {
+    let secure = false; // 로컬 개발 시 false, 배포 시 true
 
+    let mut cookie = Cookie::new("token", token.to_string());
+    cookie.set_path("/");
+    cookie.set_http_only(true);
+    cookie.set_secure(secure);
+    cookie.set_same_site(SameSite::Lax);
+    cookie
+}
+
+pub async fn require_jwt(req: Request<axum::body::Body>, next: Next) -> Result<Response, StatusCode> {
     let cookies = req.headers().typed_get::<HeaderCookie>();
 
     let token = match cookies.and_then(|c| c.get("token").map(|s| s.to_string())) {
@@ -57,13 +67,28 @@ pub async fn require_jwt(req: Request<axum::body::Body>, next: Next) -> Result<R
     Ok(next.run(req).await)
 }
 
-pub fn build_jwt_cookie(token: &str) -> Cookie {
-    let secure = false; // 로컬 개발 시 false, 배포 시 true
+pub async fn require_jwt_or_redirect(req: Request<axum::body::Body>, next: Next) -> Result<Response, StatusCode> {
+    let cookies = req.headers().typed_get::<HeaderCookie>();
+    let token = match cookies.and_then(|c| c.get("token").map(|s| s.to_string())) {
+        Some(t) => t,
+        None => return Ok(Redirect::to("/login").into_response()),
+    };
 
-    let mut cookie = Cookie::new("token", token.to_string());
-    cookie.set_path("/");
-    cookie.set_http_only(true);
-    cookie.set_secure(secure);
-    cookie.set_same_site(SameSite::Lax);
-    cookie
+    if decode_jwt(&token).is_err() {
+        return Ok(Redirect::to("/login").into_response());
+    }
+
+    Ok(next.run(req).await)
+}
+
+pub fn extract_valid_token(headers: &HeaderMap) -> Option<String> {
+    if let Some(cookie_header) = headers.typed_get::<HeaderCookie>() {
+        if let Some(token) = cookie_header.get("token") {
+            match decode_jwt(token) {
+                Ok(_) => return Some(token.to_string()),
+                Err(e) => tracing::warn!("유효하지 않은 JWT: {}", e),
+            }
+        }
+    }
+    None
 }

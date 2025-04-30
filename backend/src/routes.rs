@@ -1,5 +1,5 @@
 use axum::{middleware, routing::{delete, get, post, put}, Router};
-use crate::{auth::require_jwt, handlers::*};
+use crate::{auth::{require_jwt, require_jwt_or_redirect}, handlers::*};
 
 pub fn create_routes() -> Router {
     Router::new()
@@ -18,12 +18,12 @@ pub fn create_routes() -> Router {
         .route("/", get(redirect_to_index))
         .route("/login", get(render_login_page))
         .route("/signup", get(render_signup_page))
-        .route("/docs", get(render_doc_list).layer(middleware::from_fn(require_jwt)))
-        .route("/templates", get(render_template_list).layer(middleware::from_fn(require_jwt)))
-        .route("/search", get(render_search_results).layer(middleware::from_fn(require_jwt)))
-        .route("/create", get(create_doc_page).layer(middleware::from_fn(require_jwt)))
-        .route("/tags", get(render_all_tags).layer(middleware::from_fn(require_jwt)))
-        .route("/edit/:name", get(edit_doc_page).layer(middleware::from_fn(require_jwt)))
-        .route("/:name", get(render_doc_page).layer(middleware::from_fn(require_jwt)))
-        .route("/tag/:name", get(render_search_tags).layer(middleware::from_fn(require_jwt)))
+        .route("/docs", get(render_doc_list).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/templates", get(render_template_list).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/search", get(render_search_results).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/create", get(create_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/tags", get(render_all_tags).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/edit/:name", get(edit_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/:name", get(render_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/tag/:name", get(render_search_tags).layer(middleware::from_fn(require_jwt_or_redirect)))
 }
