@@ -16,12 +16,11 @@ lite-wiki/
 ├── backend/            # Rust 서버 소스코드 및 Dockerfile
 │   ├── src/
 │   ├── static/         # HTML 파일
+│   ├── data/           # 문서 및 템플릿 디렉토리
 │   ├── Cargo.lock
 │   ├── Cargo.toml
 │   ├── Dockerfile
 │   └── .env
-├── data/               # 문서 및 템플릿 디렉토리
-├── docker/             # 배포 관련 설정 파일 (예정)
 ├── docker-compose.yml  # 실행 환경 정의
 └── README.md
 ```
