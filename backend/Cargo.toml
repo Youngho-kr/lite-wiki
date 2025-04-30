@@ -34,4 +34,5 @@ argon2 = { version = "0.5", features = ["password-hash", "std"]}
 password-hash = "0.5"
 # JWT token
 jsonwebtoken = "8.2"
+# 쿠키
 cookie = "0.18"
