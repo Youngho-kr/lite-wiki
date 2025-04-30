@@ -9,6 +9,8 @@ WORKDIR /lite-wiki
 RUN cp /usr/src/app/target/release/lite-wiki-backend /usr/local/bin/lite-wiki
 
 COPY data ./data
+COPY .env .env
+COPY static ./static
 
 EXPOSE 3000
 CMD ["lite-wiki"]

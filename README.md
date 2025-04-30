@@ -35,8 +35,7 @@ TEMPLATE_PATH=./data/templates
 ```
 ### Docker 배포
 ```
-docker build -t litewiki .
-docker run -d -p 3000:3000 --name litewiki_app litewiki
+docker compose up --build
 ```
 
 ## 웹 접속 (수정 예정)
