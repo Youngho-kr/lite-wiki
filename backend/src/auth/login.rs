@@ -1,8 +1,9 @@
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
-use axum::{http::StatusCode, response::IntoResponse, Json};
-use jsonwebtoken::{encode, EncodingKey, Header};
+use axum::{http::{header::SET_COOKIE, HeaderMap, HeaderValue, StatusCode}, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
-use crate::{auth::load_users, config::JWT_SECRET};
+use tracing::info;
+
+use crate::auth::{build_jwt_cookie, create_jwt, load_users};
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
@@ -15,40 +16,37 @@ pub struct LoginResponse {
     token: String,
 }
 
-#[derive(Serialize)]
-struct Claims {
-    sub: String,
-    exp: usize,
-}
-
 pub async fn login(payload: LoginRequest) -> impl IntoResponse {
     let users = load_users().unwrap_or_default();
     let user = match users.iter().find(|u| u.username == payload.username) {
         Some(u) => u,
-        None => return (StatusCode::UNAUTHORIZED, "Invalid credentials").into_response()
+        None => { 
+            info!("로그인 실패: 존재하지 않는 사용자 {}", payload.username);
+            return (StatusCode::UNAUTHORIZED, "Invalid credentials").into_response() 
+        }
     };
 
     if !user.is_authorized {
+        info!("로그인 실패: 권한 허용되지 않은 사용자 {}", payload.username);
         return (StatusCode::FORBIDDEN, "Waiting for approval").into_response()
     }
 
     let parsed_hash = PasswordHash::new(&user.password_hash).unwrap();
     if Argon2::default().verify_password(payload.password.as_bytes(), &parsed_hash).is_err() {
+        info!("로그인 실패: 비밀번호 오류 ({})", user.username);
         return (StatusCode::UNAUTHORIZED, "Invalid credentials").into_response();
     }
 
-    let expiration = chrono::Utc::now()
-        .checked_add_signed(chrono::Duration::hours(24))
-        .unwrap()
-        .timestamp() as usize;
+    info!("로그인 성공: {}", user.username);
 
-    let claims = Claims {
-        sub: user.username.clone(),
-        exp: expiration,
-    };
+    let token = create_jwt(&user.username).unwrap();
+    let cookie = build_jwt_cookie(&token);
 
-    let token = encode(&Header::default(), &claims, &EncodingKey::from_secret(JWT_SECRET.clone().as_bytes()))
-        .unwrap();
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        SET_COOKIE,
+        HeaderValue::from_str(&cookie.to_string()).unwrap(),
+    );
 
-    Json(LoginResponse { token }).into_response()
+    (headers, Json(LoginResponse { token })).into_response()
 }
