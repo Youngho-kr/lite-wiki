@@ -5,6 +5,7 @@ pub mod templates;
 pub mod redirect;
 pub mod search;
 pub mod html_render;
+pub mod auth;
 
 pub use api::*;
 pub use view::*;
@@ -13,3 +14,4 @@ pub use templates::*;
 pub use redirect::*;
 pub use search::*;
 pub use html_render::*;
+pub use auth::*;

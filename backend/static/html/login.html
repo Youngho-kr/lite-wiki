@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>로그인</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: auto; padding: 2rem; }
+    input { display: block; margin-bottom: 1rem; width: 100%; padding: 8px; font-size: 1rem; }
+    button { padding: 8px 16px; }
+  </style>
+</head>
+<body>
+  <h1>로그인</h1>
+  <input type="text" id="username" placeholder="아이디" />
+  <input type="password" id="password" placeholder="비밀번호" />
+  <button id="loginBtn">로그인</button>
+  <p>계정이 없으신가요? <a href="/signup">회원가입</a></p>
+
+  <script>
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("token", data.token);
+        alert("로그인 성공");
+        location.href = "/";
+      } else {
+        alert("로그인 실패");
+      }
+    });
+  </script>
+</body>
+</html>

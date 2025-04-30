@@ -108,6 +108,18 @@ pub fn render_all_tags_html(tags: &[String]) -> String {
     template.replace("{items}", &items)
 }
 
+pub fn render_login_page_html() -> String {
+    let template = load_template_file("login.html").unwrap_or_default();
+
+    template
+}
+
+pub fn render_signup_page_html() -> String {
+    let template = load_template_file("signup.html").unwrap_or_default();
+
+    template
+}
+
 fn render_viewer_tags(tags: &[String]) -> String {
     tags.iter()
         .map(|tag| format!(r#"<a href="/tag/{}" class="tag">#{}</a>"#, tag, tag))
