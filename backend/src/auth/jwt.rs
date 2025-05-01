@@ -7,7 +7,7 @@ use headers::HeaderMapExt;
 use headers::Cookie as HeaderCookie;
 use jsonwebtoken::{decode, encode, errors::Error as JwtError, Header, DecodingKey, EncodingKey, Validation};
 use serde::{Deserialize, Serialize};
-use cookie::{Cookie, SameSite};
+use cookie::{time, Cookie, SameSite};
 
 use crate::config::JWT_SECRET;
 
@@ -46,6 +46,19 @@ pub fn build_jwt_cookie(token: &str) -> Cookie {
 
     let mut cookie = Cookie::new("token", token.to_string());
     cookie.set_path("/");
+    cookie.set_max_age(time::Duration::hours(1));
+    cookie.set_http_only(true);
+    cookie.set_secure(secure);
+    cookie.set_same_site(SameSite::Lax);
+    cookie
+}
+
+pub fn build_jwt_removal_cooke() -> Cookie<'static> {
+    let secure = false; // 로컬 개발 시 false, 배포 시 true
+
+    let mut cookie = Cookie::new("token", "");
+    cookie.set_path("/");
+    cookie.set_max_age(time::Duration::seconds(0));
     cookie.set_http_only(true);
     cookie.set_secure(secure);
     cookie.set_same_site(SameSite::Lax);

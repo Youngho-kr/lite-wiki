@@ -1,6 +1,6 @@
 
 use axum::{http::Request, response::{Html, IntoResponse, Redirect}, Json};
-use crate::auth::{extract_valid_token, login, signup, LoginRequest, SignUpRequest};
+use crate::auth::{extract_valid_token, login, logout, signup, LoginRequest, SignUpRequest};
 use crate::handlers::html_render::{render_login_page_html, render_signup_page_html};
 
 pub async fn handle_login(Json(payload): Json<LoginRequest>) -> impl IntoResponse {
@@ -9,6 +9,10 @@ pub async fn handle_login(Json(payload): Json<LoginRequest>) -> impl IntoRespons
 
 pub async fn handle_signup(Json(payload): Json<SignUpRequest>) -> impl IntoResponse {
     signup(payload).await
+}
+
+pub async fn handle_logout() -> impl IntoResponse {
+    logout().await
 }
 
 pub async fn render_login_page(req: Request<axum::body::Body>) -> impl IntoResponse {

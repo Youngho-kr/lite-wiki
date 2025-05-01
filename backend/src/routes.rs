@@ -9,6 +9,7 @@ pub fn create_routes() -> Router {
         // Auth
         .route("/api/login", post(handle_login))
         .route("/api/signup", post(handle_signup))
+        .route("/api/logout", get(handle_logout))
         // REST API
         .route("/api/docs", get(list_docs).layer(middleware::from_fn(require_jwt)))
         .route("/api/docs/:name", get(get_doc).layer(middleware::from_fn(require_jwt)))
