@@ -1,10 +1,11 @@
 use axum::{
     extract::{Path, Json}, 
     response::IntoResponse, 
-    http::StatusCode
+    http::StatusCode,
 };
+use axum_macros::debug_handler;
 use serde::{Deserialize, Serialize};
-use crate::storage::*;
+use crate::{auth::AuthUser, storage::*};
 
 #[derive(Deserialize)]
 pub struct SaveDoc {
@@ -31,15 +32,13 @@ pub async fn get_doc(Path(name): Path<String>) ->  impl IntoResponse {
     }
 }
 
-pub async fn create_doc(Path(name): Path<String>, Json(payload): Json<SaveDoc>) -> impl IntoResponse {
-    match create_new_doc(&name, &payload.content) {
-        Ok(_) => (StatusCode::OK, "Saved").into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response(),
-    }
-}
-
-pub async fn edit_doc(Path(name): Path<String>, Json(payload): Json<SaveDoc>) -> impl IntoResponse {
-    match edit_existing_doc(&name, &payload.content) {
+#[debug_handler]
+pub async fn post_doc(
+    Path(name): Path<String>, 
+    AuthUser(username): AuthUser,
+    Json(payload): Json<SaveDoc> 
+) -> impl IntoResponse {
+    match save_doc(&name, &payload.content, &username) {
         Ok(_) => (StatusCode::OK, "Saved").into_response(),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response(),
     }
@@ -78,9 +77,11 @@ pub async fn get_tags(Path(name): Path<String>) -> impl IntoResponse {
 
 pub async fn update_tags(
     Path(name): Path<String>,
-    Json(payload): Json<TagUpdateRequest>,
+    AuthUser(username): AuthUser,
+    Json(payload): Json<TagUpdateRequest>
 ) -> impl IntoResponse {
     let mut meta = load_doc_meta(&name).unwrap_or_default();
+    // Update tags
     meta.tags = payload.tags;
 
     match save_doc_meta(&name, &meta) {

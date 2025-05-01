@@ -1,4 +1,5 @@
 use std::{collections::HashSet, fs, io};
+
 use crate::storage::*;
 
 // 문서 본문 로드 및 저장
@@ -26,7 +27,26 @@ pub fn load_doc(name: &str) -> io::Result<String> {
     Ok(content)
 }
 
-pub fn create_new_doc(name: &str, content: &str) -> io::Result<()> {
+pub fn save_doc(name: &str, content: &str, editor: &str) -> io::Result<()> {
+    let exists = load_doc(&name).is_ok();
+    let result = if exists {
+        edit_existing_doc(&name, &content, editor)
+    } else {
+        create_new_doc(&name, content, editor)
+    };
+
+    match result {
+        Ok(_) => {
+            tracing::info!("[{}] {}", name, if exists { "edited" } else { "created" });
+            Ok(())
+        }
+        Err(e) => {
+            Err(e)
+        }
+    }
+}
+
+fn create_new_doc(name: &str, content: &str, editor: &str) -> io::Result<()> {
     let path = doc_path(name);
     if path.exists() {
         return Err(io::Error::new(io::ErrorKind::AlreadyExists, "Document already exists"));
@@ -34,13 +54,13 @@ pub fn create_new_doc(name: &str, content: &str) -> io::Result<()> {
 
     fs::write(&path, content)?;
 
-    let meta = DocMeta::new();
+    let meta = DocMeta::new(editor);
     save_doc_meta(name, &meta)?;
 
     Ok(())
 }
 
-pub fn edit_existing_doc(name: &str, new_content: &str) -> io::Result<()> {
+fn edit_existing_doc(name: &str, new_content: &str, editor: &str) -> io::Result<()> {
     let old_content = load_doc(name).unwrap_or_default();
 
     if old_content == new_content {
@@ -50,7 +70,7 @@ pub fn edit_existing_doc(name: &str, new_content: &str) -> io::Result<()> {
     fs::write(doc_path(name), new_content)?;
 
     let mut meta = load_doc_meta(name).unwrap_or_default();
-    meta.record_edit("save", Some(&old_content), Some(new_content));
+    meta.record_edit(editor, "save", Some(&old_content), Some(new_content));
     save_doc_meta(name, &meta)
 }
 
@@ -102,10 +122,11 @@ mod tests {
 
         let title = "create_new_doc_success";
         let content = "This is LiteWiki!";
+        let editor = "test_editor";
 
         clear_test_doc(title);
 
-        assert!(create_new_doc(title, content).is_ok());
+        assert!(create_new_doc(title, content, editor).is_ok());
 
         let path = doc_path(title);
         assert!(path.exists());
@@ -124,11 +145,12 @@ mod tests {
         let title = "create_exists_doc_fail";
         let original = "This is LiteWiki!";
         let updated = "Is this LiteWiki?";
+        let editor = "test_editor";
 
         clear_test_doc(title);
 
-        assert!(create_new_doc(title, original).is_ok());
-        let result = create_new_doc(title, updated);
+        assert!(create_new_doc(title, original, editor).is_ok());
+        let result = create_new_doc(title, updated, editor);
         assert!(matches!(result, Err(e) if e.kind() == io::ErrorKind::AlreadyExists));
     }
 
@@ -139,11 +161,12 @@ mod tests {
         let title = "test_edit_doc";
         let original = "Original content";
         let updated = "Updated content";
+        let editor = "test_editor";
 
         clear_test_doc(title);
 
-        create_new_doc(title, original).unwrap();
-        let result = edit_existing_doc(title, updated);
+        create_new_doc(title, original, editor).unwrap();
+        let result = edit_existing_doc("test_editor", title, updated);
         assert!(result.is_ok());
 
         let saved = fs::read_to_string(doc_path(title)).unwrap();
@@ -160,11 +183,12 @@ mod tests {
 
         let title = "test_edit_existing_doc_no_diff";
         let content = "Hello world";
+        let editor = "test_editor";
 
         clear_test_doc(title);
 
-        create_new_doc(title, content).unwrap();
-        assert!(edit_existing_doc(title, content).is_ok());
+        create_new_doc(title, content, editor).unwrap();
+        assert!(edit_existing_doc("test_editor", title, content).is_ok());
 
         let meta = load_doc_meta(title).unwrap();
         assert_eq!(meta.history.len(), 1);
@@ -176,10 +200,11 @@ mod tests {
 
         let title = "test_delete_doc";
         let content = "Content";
+        let editor = "test_editor";
 
         clear_test_doc(title);
         
-        create_new_doc(title, content).unwrap();
+        create_new_doc(title, content, editor).unwrap();
         
         assert!(delete_doc_file(title).is_ok());
         assert!(!doc_path(title).exists());
@@ -191,10 +216,11 @@ mod tests {
 
         let title = "test_load_doc";
         let content = "test load doc";
+        let editor = "test_editor";
 
         clear_test_doc(title);
 
-        create_new_doc(title, content).unwrap();
+        create_new_doc(title, content, editor).unwrap();
 
         let loaded = load_doc(title).unwrap();
         assert_eq!(content, loaded);
@@ -205,9 +231,10 @@ mod tests {
         setup_test_env();
         let title = "test_list_doc_names";
         let content = "checking file in list";
+        let editor = "test_editor";
 
         clear_test_doc(title);
-        create_new_doc(title, content).unwrap();
+        create_new_doc(title, content, editor).unwrap();
 
         let names = list_doc_names().unwrap();
         assert!(names.contains(&title.to_string()));

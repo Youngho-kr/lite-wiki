@@ -76,7 +76,7 @@
       const content = editor.getMarkdown();
 
       await fetch("/api/docs/" + encodeURIComponent(pageName), {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
       });

@@ -1,4 +1,10 @@
-use axum::{async_trait, extract::FromRequestParts, http::{request::Parts, StatusCode}};
+use axum::{
+    async_trait, 
+    body::Body, 
+    extract::{FromRequest, FromRequestParts, Request}, 
+    http::{request::Parts, StatusCode}
+};
+use headers::{HeaderMapExt, Cookie as HeaderCookie};
 use serde::{Deserialize, Serialize};
 
 use crate::auth::decode_jwt;
@@ -28,6 +34,22 @@ where
         let Some(token) = extract_valid_token(headers) else {
             return Err(StatusCode::UNAUTHORIZED);
         };
+
+        let username = decode_jwt(&token).map_err(|_| StatusCode::UNAUTHORIZED)?;
+        Ok(AuthUser(username))
+    }
+}
+
+#[async_trait]
+impl FromRequest<Body> for AuthUser {
+    type Rejection = StatusCode;
+
+    async fn from_request(req: Request<Body>, _state: &Body) -> Result<Self, Self::Rejection> {
+        let headers = req.headers();
+        let token = headers
+            .typed_get::<HeaderCookie>()
+            .and_then(|c| c.get("token").map(|s| s.to_string()))
+            .ok_or(StatusCode::UNAUTHORIZED)?;
 
         let username = decode_jwt(&token).map_err(|_| StatusCode::UNAUTHORIZED)?;
         Ok(AuthUser(username))
