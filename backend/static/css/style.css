@@ -1,0 +1,122 @@
+body {
+    font-family: sans-serif;
+    max-width: 720px;
+    margin: auto;
+    padding: 2rem;
+  }
+  
+  #topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    /* border-bottom: 1px solid #ddd; */
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 4px 10px;
+    margin-right: 6px;
+    background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #333;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .nav-button:hover {
+    background: #eee;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+
+  #topbar .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .search-form input[type="text"] {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  #logout {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  #logout:hover {
+    background: #ddd;
+  }
+  
+  button {
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  
+  input[type="text"], input[type="password"] {
+    padding: 6px;
+    width: 100%;
+    font-size: 1.1rem;
+    box-sizing: border-box;
+  }
+  
+  #editor {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  #edit-btn {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  #edit-btn:hover {
+    background: #ddd;
+  }
+  
+  #search-form input {
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  #tags {
+    margin-bottom: 1rem;
+  }
+  
+  .tag {
+    display: inline-block;
+    background-color: #f3f3f3;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-right: 6px;
+    font-size: 0.9em;
+    text-decoration: none;
+    color: #0366d6;
+  }
+  
+  .tag:hover {
+    background-color: #e6e6e6;
+  }
+  
+  .tag .remove-tag {
+    margin-left: 4px;
+    color: red;
+    cursor: pointer;
+    text-decoration: none;
+  }

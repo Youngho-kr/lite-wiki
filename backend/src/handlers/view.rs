@@ -7,14 +7,11 @@ use axum::{
 use crate::handlers::html_render::*;
 use crate::storage::{load_doc, load_doc_meta, load_template};
 
-use pulldown_cmark::{html, Options, Parser};
-
 pub async fn render_doc_page(Path(name): Path<String>) -> impl IntoResponse {
     match load_doc(&name) {
         Ok(md_content) => {
             let meta = load_doc_meta(&name).unwrap_or_default();
-            let html_output = markdown_to_html(&md_content);
-            Html(render_viewer_html(&name, &html_output, &meta.tags, &meta.history)).into_response()
+            Html(render_viewer_html(&name, &md_content, &meta.tags, &meta.history, "user")).into_response()
         }
         Err(_) => Redirect::to(&format!("/create?title={}", name)).into_response(),
     }
@@ -24,8 +21,7 @@ pub async fn edit_doc_page(Path(name): Path<String>,) -> impl IntoResponse {
     match load_doc(&name) {
         Ok(md_content) => {
             let meta = load_doc_meta(&name).unwrap_or_default();
-            let escaped = serde_json::to_string(&md_content).unwrap();
-            Html(render_editor_html(&name, &escaped, &meta.tags)).into_response()
+            Html(render_editor_html(&name, &md_content, &meta.tags, "user")).into_response()
         }
         Err(_) => Redirect::to(&format!("/create?title={}", name)).into_response(),
     }
@@ -40,11 +36,4 @@ pub async fn create_doc_page(Query(params): Query<HashMap<String, String>>) -> H
         .unwrap_or_default();
 
     Html(render_create_html(&title, &content))
-}
-
-fn markdown_to_html(md: &str) -> String {
-    let parser = Parser::new_ext(md, Options::all());
-    let mut html_output = String::new();
-    html::push_html(&mut html_output, parser);
-    html_output
 }

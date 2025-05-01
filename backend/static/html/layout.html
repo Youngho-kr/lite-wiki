@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>{title}</title>
+  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div id="topbar">
+    <div class="nav-links">
+      <a href="/", class="nav-button">🏠 홈</a>
+      <a href="/docs", class="nav-button">📄 문서</a>
+      <a href="/tags", class="nav-button">🏷️ 태그</a>
+      <a href="/admin", class="nav-button">🔧 관리자</a>
+    </div>
+    <div class="topbar-right">
+        <form action="/search" method="get" class="search-form">
+          <input type="text" name="q" placeholder="🔍" />
+        </form>
+        <span>{username}</span>
+        <a id="logout" href="/logout">로그아웃</a>
+    </div>
+  </div>
+  <div>
+      {content}
+  </div>
+</body>
+</html>

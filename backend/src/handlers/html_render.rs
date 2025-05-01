@@ -1,25 +1,61 @@
 use crate::storage::*;
+use std::collections::HashMap;
 
-pub fn render_viewer_html(name: &str, html: &str, tags: &[String], history: &[EditLog]) -> String {
-    let tag_links = render_viewer_tags(tags);
-    let history_html = render_history_section(history);
-    let template = load_template_file("viewer.html").unwrap_or_default();
+fn render_template(template_name: &str, vars: &HashMap<&str, String>) -> String {
+    let content = load_template_file(template_name).unwrap_or_default();
+    let mut result = content;
 
-    template
-        .replace("{title}", name)
-        .replace("{tags}", &tag_links)
-        .replace("{escaped_html}", &serde_json::to_string(html).unwrap())
-        .replace("{history_section}", &history_html)
+    for (key, value) in vars {
+        result = result.replace(&format!("{{{}}}", key), value)
+    }
+
+    result
 }
 
-pub fn render_editor_html(name: &str, html: &str, tags: &[String]) -> String {
-    let template = load_template_file("editor.html").unwrap_or_default();
-    let tag_links = render_editor_tags(tags);
+fn render_layout(content: &str, username: &str) -> String {
+    let mut vars = HashMap::new();
 
-    template
-        .replace("{name}", name)
-        .replace("{html}", html)
-        .replace("{tags}", &tag_links)
+    vars.insert("content", content.to_string());
+    vars.insert("username", username.to_string());
+
+    render_template("layout.html", &vars)
+}
+
+fn render_full_page(template_name: &str, vars: &HashMap<&str, String>, username: &str) -> String {
+    let content = render_template(template_name, vars);
+    render_layout(&content, username)
+}
+
+pub fn render_viewer_html(
+    title: &str, 
+    html: &str, 
+    tags: &[String],
+    history: &[EditLog],
+    username: &str,
+) -> String {
+    let mut vars = HashMap::new();
+
+    vars.insert("title", title.to_string());
+    vars.insert("md", serde_json::to_string(html).unwrap());
+    vars.insert("tags", render_viewer_tags(tags));
+    vars.insert("history_section", render_history_section(history));
+
+    render_full_page("viewer.html", &vars, username)
+}
+
+pub fn render_editor_html(
+    title: &str, 
+    html: &str, 
+    tags: &[String],
+    username: &str
+) -> String {
+    let mut vars = HashMap::new();
+
+    vars.insert("title", title.to_string());
+    vars.insert("md", serde_json::to_string(html).unwrap());
+    vars.insert("tags", render_editor_tags(tags));
+
+    render_full_page("editor.html", &vars, username)
 }
 
 pub fn render_search_result_html(keyword: &str, results: &[String]) -> String {

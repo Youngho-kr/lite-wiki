@@ -1,53 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Edit: {name}</title>
-  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 720px;
-      margin: auto;
-      padding: 2rem;
-    }
-    #editor {
-      margin-bottom: 1rem;
-    }
-    #tags-area {
-      margin-bottom: 1rem;
-    }
-    .tag {
-      display: inline-block;
-      background: #f3f3f3;
-      border-radius: 4px;
-      padding: 4px 8px;
-      margin-right: 6px;
-      font-size: 0.9rem;
-      color: #333;
-      position: relative;
-    }
-    .tag .remove-tag {
-      margin-left: 6px;
-      color: red;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #add-tag-btn {
-      background: #ddd;
-      border: none;
-      padding: 4px 8px;
-      margin-top: 8px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    #add-tag-btn:hover {
-      background: #ccc;
-    }
-  </style>
-</head>
 <body>
-  <h1>Editing: {name}</h1>
+  <h1>Editing: {title}</h1>
 
   <div id="tags-area">
     <div id="tags">{tags}</div>
@@ -59,8 +11,8 @@
 
   <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
   <script>
-    const markdownContent = {html};
-    const pageName = "{name}";
+    const markdownContent = {md};
+    const pageName = "{title}";
 
     const editor = new toastui.Editor({
       el: document.querySelector('#editor'),
@@ -93,10 +45,10 @@
       });
     });
 
-    function addTag(name) {
+    function addTag(tagName) {
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = "#" + name;
+      tag.textContent = "#" + tagName;
 
       const removeBtn = document.createElement("span");
       removeBtn.className = "remove-tag";
@@ -109,7 +61,7 @@
 
     function collectTags() {
       return Array.from(tagsDiv.getElementsByClassName("tag"))
-          .map(tag => tag.firstChild.textContent.slice(1)); // '#' 제외
+          .map(tag => tag.firstChild.textContent.slice(1).trim()); // '#' 제외
     }
 
     document.querySelectorAll('.remove-tag').forEach(btn => {
@@ -140,4 +92,3 @@
     });
   </script>
 </body>
-</html>

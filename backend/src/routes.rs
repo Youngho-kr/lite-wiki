@@ -1,8 +1,11 @@
 use axum::{middleware, routing::{delete, get, post, put}, Router};
+use tower_http::services::ServeDir;
 use crate::{auth::{require_jwt, require_jwt_or_redirect}, handlers::*};
 
 pub fn create_routes() -> Router {
     Router::new()
+        // css
+        .nest_service("/static", ServeDir::new("static"))
         // Auth
         .route("/api/login", post(handle_login))
         .route("/api/signup", post(handle_signup))
