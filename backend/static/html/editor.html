@@ -75,20 +75,19 @@
       const tags = collectTags();
       const content = editor.getMarkdown();
 
-      await fetch("/api/docs/" + encodeURIComponent(pageName), {
+      const response = await fetch("/api/docs/" + encodeURIComponent(pageName), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, tags }),
       });
 
-      await fetch("/api/tags/" + encodeURIComponent(pageName), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tags }),
-      });
-
-      alert("저장 완료!");
-      location.href = "/" + encodeURIComponent(pageName);
+      if (response.ok) {
+        alert("저장 완료!");
+        location.href = "/" + encodeURIComponent(pageName);
+      } else {
+        const errorText = await response.text();
+        alert("저장 실패: " + errorText);
+      }
     });
   </script>
 </body>

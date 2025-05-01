@@ -193,7 +193,7 @@ pub fn render_signup_page_html() -> String {
 
 fn render_viewer_tags(tags: &[String]) -> String {
     tags.iter()
-        .map(|tag| format!(r#"<a href="/tag/{}" class="tag">#{}</a>"#, tag, tag))
+        .map(|tag| format!(r#"<a href="/tags/{}" class="tag">#{}</a>"#, tag, tag))
         .collect::<Vec<_>>()
         .join(" ")
 }

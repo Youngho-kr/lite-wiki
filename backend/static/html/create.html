@@ -1,6 +1,12 @@
 <body>
   <h1>📄 새 문서 만들기</h1>
   <input type="text" id="titleInput" value="{title}" placeholder="문서 제목 입력..." />
+
+  <div id="tags-area">
+    <div id="tags"></div>
+    <button id="add-tag-btn">➕ 태그 추가</button>
+  </div>
+
   <div id="editor"></div>
   <button id="saveBtn">💾 저장</button>
 
@@ -14,8 +20,56 @@
       initialValue: {html},
     });
 
-    document.querySelector('#saveBtn').addEventListener('click', async () => {
-      const title = document.querySelector('#titleInput').value.trim();
+    // 태그 관련 로직
+    const tagsDiv = document.getElementById("tags");
+    document.getElementById("add-tag-btn").addEventListener("click", () => {
+      const tagInput = document.createElement("input");
+      tagInput.type = "text";
+      tagInput.placeholder = "새 태그 입력 후 Enter";
+      tagInput.style.marginRight = "6px";
+      tagsDiv.appendChild(tagInput);
+      tagInput.focus();
+
+      tagInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && tagInput.value.trim() !== "") {
+          e.preventDefault();
+          addTag(tagInput.value.trim());
+          tagsDiv.removeChild(tagInput);
+        }
+      });
+
+      tagInput.addEventListener("blur", () => {
+        tagsDiv.removeChild(tagInput);
+      });
+    });
+
+    function addTag(tagName) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "#" + tagName;
+
+      const removeBtn = document.createElement("span");
+      removeBtn.className = "remove-tag";
+      removeBtn.textContent = "×";
+      removeBtn.onclick = () => tag.remove();
+
+      tag.appendChild(removeBtn);
+      tagsDiv.appendChild(tag);
+    }
+
+    function collectTags() {
+      return Array.from(tagsDiv.getElementsByClassName("tag"))
+          .map(tag => tag.firstChild.textContent.slice(1).trim()); // '#' 제외
+    }
+
+    document.querySelectorAll('.remove-tag').forEach(btn => {
+      btn.addEventListener('click', () => {
+          btn.parentElement.remove();
+      });
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const title = document.getElementById('titleInput').value.trim();
       if (!title) {
         alert("제목을 입력해주세요");
         return;
@@ -28,10 +82,13 @@
           return;
         }
 
-        const res = await fetch("api/docs/" + encodeURIComponent(title), {
+        const content = editor.getMarkdown();
+        const tags = collectTags();
+
+        const res = await fetch("/api/docs/" + encodeURIComponent(title), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: editor.getMarkdown() }),
+          body: JSON.stringify({ content, tags }),
         });
 
         if (res.ok) {
@@ -44,6 +101,36 @@
         console.error(err);
       }
     });
+    // document.querySelector('#saveBtn').addEventListener('click', async () => {
+    //   const title = document.querySelector('#titleInput').value.trim();
+    //   if (!title) {
+    //     alert("제목을 입력해주세요");
+    //     return;
+    //   }
+
+    //   try {
+    //     const check = await fetch("/api/docs/check/" + encodeURIComponent(title));
+    //     if (check.status === 200) {
+    //       alert("이미 존재하는 문서 제목입니다.");
+    //       return;
+    //     }
+
+    //     const res = await fetch("api/docs/" + encodeURIComponent(title), {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({ content: editor.getMarkdown() }),
+    //     });
+
+    //     if (res.ok) {
+    //       location.href = "/" + encodeURIComponent(title);
+    //     } else {
+    //       alert("저장 실패");
+    //     }
+    //   } catch (err) {
+    //     alert("저장 실패");
+    //     console.error(err);
+    //   }
+    // });
   </script>
 </body>
 </html>

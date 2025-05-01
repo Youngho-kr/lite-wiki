@@ -10,6 +10,7 @@ use crate::{auth::AuthUser, storage::*};
 #[derive(Deserialize)]
 pub struct SaveDoc {
     pub content: String,
+    pub tags: Vec<String>
 }
 
 #[derive(Serialize)]
@@ -38,7 +39,7 @@ pub async fn post_doc(
     AuthUser(username): AuthUser,
     Json(payload): Json<SaveDoc> 
 ) -> impl IntoResponse {
-    match save_doc(&name, &payload.content, &username) {
+    match save_doc(&name, &payload.content, &payload.tags, &username) {
         Ok(_) => (StatusCode::OK, "Saved").into_response(),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response(),
     }
@@ -75,17 +76,17 @@ pub async fn get_tags(Path(name): Path<String>) -> impl IntoResponse {
     }
 }
 
-pub async fn update_tags(
-    Path(name): Path<String>,
-    AuthUser(username): AuthUser,
-    Json(payload): Json<TagUpdateRequest>
-) -> impl IntoResponse {
-    let mut meta = load_doc_meta(&name).unwrap_or_default();
-    // Update tags
-    meta.tags = payload.tags;
+// pub async fn update_tags(
+//     Path(name): Path<String>,
+//     AuthUser(username): AuthUser,
+//     Json(payload): Json<TagUpdateRequest>
+// ) -> impl IntoResponse {
+//     let mut meta = load_doc_meta(&name).unwrap_or_default();
+//     // Update tags
+//     meta.tags = payload.tags;
 
-    match save_doc_meta(&name, &meta) {
-        Ok(_) => (StatusCode::OK, "Success to save").into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response(),
-    }
-}
+//     match save_doc_meta(&name, &meta) {
+//         Ok(_) => (StatusCode::OK, "Success to save").into_response(),
+//         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to save").into_response(),
+//     }
+// }

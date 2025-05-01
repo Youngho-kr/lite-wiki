@@ -27,12 +27,12 @@ pub fn load_doc(name: &str) -> io::Result<String> {
     Ok(content)
 }
 
-pub fn save_doc(name: &str, content: &str, editor: &str) -> io::Result<()> {
+pub fn save_doc(name: &str, content: &str, tags: &[String], editor: &str) -> io::Result<()> {
     let exists = load_doc(&name).is_ok();
     let result = if exists {
-        edit_existing_doc(&name, &content, editor)
+        edit_existing_doc(&name, &content, tags, editor)
     } else {
-        create_new_doc(&name, content, editor)
+        create_new_doc(&name, content, tags, editor)
     };
 
     match result {
@@ -46,7 +46,7 @@ pub fn save_doc(name: &str, content: &str, editor: &str) -> io::Result<()> {
     }
 }
 
-fn create_new_doc(name: &str, content: &str, editor: &str) -> io::Result<()> {
+fn create_new_doc(name: &str, content: &str, tags: &[String], editor: &str) -> io::Result<()> {
     let path = doc_path(name);
     if path.exists() {
         return Err(io::Error::new(io::ErrorKind::AlreadyExists, "Document already exists"));
@@ -54,13 +54,13 @@ fn create_new_doc(name: &str, content: &str, editor: &str) -> io::Result<()> {
 
     fs::write(&path, content)?;
 
-    let meta = DocMeta::new(editor);
+    let meta = DocMeta::new(tags, editor);
     save_doc_meta(name, &meta)?;
 
     Ok(())
 }
 
-fn edit_existing_doc(name: &str, new_content: &str, editor: &str) -> io::Result<()> {
+fn edit_existing_doc(name: &str, new_content: &str, tags: &[String], editor: &str) -> io::Result<()> {
     let old_content = load_doc(name).unwrap_or_default();
 
     if old_content == new_content {
@@ -69,8 +69,16 @@ fn edit_existing_doc(name: &str, new_content: &str, editor: &str) -> io::Result<
 
     fs::write(doc_path(name), new_content)?;
 
-    let mut meta = load_doc_meta(name).unwrap_or_default();
-    meta.record_edit(editor, "save", Some(&old_content), Some(new_content));
+    let meta = match load_doc_meta(name) {
+        Ok(mut meta) => {
+            meta.record_edit(editor, Some(&old_content), Some(new_content), tags);
+            meta
+        }
+        Err(_) => {
+            DocMeta::new(tags, editor)
+        }
+    };
+
     save_doc_meta(name, &meta)
 }
 
@@ -126,7 +134,7 @@ mod tests {
 
         clear_test_doc(title);
 
-        assert!(create_new_doc(title, content, editor).is_ok());
+        assert!(create_new_doc(title, content, &[], editor).is_ok());
 
         let path = doc_path(title);
         assert!(path.exists());
@@ -149,8 +157,8 @@ mod tests {
 
         clear_test_doc(title);
 
-        assert!(create_new_doc(title, original, editor).is_ok());
-        let result = create_new_doc(title, updated, editor);
+        assert!(create_new_doc(title, original, &[], editor).is_ok());
+        let result = create_new_doc(title, updated, &[], editor);
         assert!(matches!(result, Err(e) if e.kind() == io::ErrorKind::AlreadyExists));
     }
 
@@ -165,8 +173,8 @@ mod tests {
 
         clear_test_doc(title);
 
-        create_new_doc(title, original, editor).unwrap();
-        let result = edit_existing_doc("test_editor", title, updated);
+        create_new_doc(title, original, &[], editor).unwrap();
+        let result = edit_existing_doc(title,  updated, &[], "test_editor");
         assert!(result.is_ok());
 
         let saved = fs::read_to_string(doc_path(title)).unwrap();
@@ -187,8 +195,8 @@ mod tests {
 
         clear_test_doc(title);
 
-        create_new_doc(title, content, editor).unwrap();
-        assert!(edit_existing_doc("test_editor", title, content).is_ok());
+        create_new_doc(title, content, &[], editor).unwrap();
+        assert!(edit_existing_doc(title, content, &[], "test_editor").is_ok());
 
         let meta = load_doc_meta(title).unwrap();
         assert_eq!(meta.history.len(), 1);
@@ -204,7 +212,7 @@ mod tests {
 
         clear_test_doc(title);
         
-        create_new_doc(title, content, editor).unwrap();
+        create_new_doc(title, content, &[], editor).unwrap();
         
         assert!(delete_doc_file(title).is_ok());
         assert!(!doc_path(title).exists());
@@ -220,7 +228,7 @@ mod tests {
 
         clear_test_doc(title);
 
-        create_new_doc(title, content, editor).unwrap();
+        create_new_doc(title, content, &[], editor).unwrap();
 
         let loaded = load_doc(title).unwrap();
         assert_eq!(content, loaded);
@@ -234,7 +242,7 @@ mod tests {
         let editor = "test_editor";
 
         clear_test_doc(title);
-        create_new_doc(title, content, editor).unwrap();
+        create_new_doc(title, content, &[],  editor).unwrap();
 
         let names = list_doc_names().unwrap();
         assert!(names.contains(&title.to_string()));

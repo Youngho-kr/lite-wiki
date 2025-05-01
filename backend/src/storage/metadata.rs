@@ -14,10 +14,10 @@ pub struct DocMeta {
 }
 
 impl DocMeta {
-    pub fn new(editor: &str) -> Self {
+    pub fn new(new_tags: &[String], editor: &str) -> Self {
         let now = Utc::now().to_rfc3339();
         Self {
-            tags: Vec::new(),
+            tags: new_tags.to_vec(),
             created: Some(now.clone()),
             updated: Some(now.clone()),
             history: vec![EditLog {
@@ -29,23 +29,31 @@ impl DocMeta {
         }
     }
 
-    pub fn record_edit(&mut self, editor: &str, summary: &str, before: Option<&str>, after: Option<&str>) {
+    pub fn record_edit(&mut self, editor: &str, before: Option<&str>, after: Option<&str>, tags: &[String]) {
         let now = Utc::now().to_rfc3339();
         if self.created.is_none() {
             self.created = Some(now.clone());
         }
-        self. updated = Some(now.clone());
+        self.updated = Some(now.clone());
 
         let diff_summary = match (before, after) {
             (Some(b), Some(a)) if b != a => Some(generate_diff(b, a)),
             _ => None,
         };
 
+        let mut summary = Vec::new();
+        if diff_summary != None {
+            summary.push("edit");
+        }
+        if self.tags != tags {
+            summary.push("change tag");
+        }
+
         self.history.push(EditLog { 
             timestamp: now, 
             editor: editor.to_string(), 
-            summary: summary.to_string(),
-            diff_summary: diff_summary,
+            summary: summary.join(", "),
+            diff_summary,
         })
     }
 }
@@ -65,7 +73,7 @@ pub fn load_doc_meta(name: &str) -> std::io::Result<DocMeta> {
         let meta = serde_json::from_str(&content)?;
         Ok(meta)
     } else {
-        let meta = DocMeta::new("annonymous");
+        let meta = DocMeta::new(&[],"annonymous");
         save_doc_meta(name, &meta)?;
         Ok(meta)
     }
@@ -100,7 +108,7 @@ mod tests {
 
     #[test]
     fn test_docmeta_new() {
-        let meta = DocMeta::new("test_editor");
+        let meta = DocMeta::new(&[],"test_editor");
 
         assert!(meta.created.is_some());
         assert!(meta.updated.is_some());
@@ -118,7 +126,7 @@ mod tests {
 
         let editor = "test_editor";
 
-        let mut meta = DocMeta::new(editor);
+        let mut meta = DocMeta::new(&[], editor);
         meta.tags.push("test".to_string());
 
         save_doc_meta(title, &meta).unwrap();
@@ -140,11 +148,11 @@ mod tests {
 
     #[test]
     fn test_record_edit() {
-        let mut meta = DocMeta::new("test_editor");
+        let mut meta = DocMeta::new(&[], "test_editor");
         let before = "Old content";
         let after = "New content";
 
-        meta.record_edit("test_editor", "edit", Some(before), Some(after));
+        meta.record_edit("test_editor", Some(before), Some(after), &[]);
 
         assert_eq!(meta.history.len(), 2);
 

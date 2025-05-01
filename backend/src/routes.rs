@@ -15,7 +15,7 @@ pub fn create_routes() -> Router {
         .route("/api/docs/:name", post(post_doc).layer(middleware::from_fn(require_jwt)))
         .route("/api/docs/:name", delete(delete_doc).layer(middleware::from_fn(require_jwt)))
         .route("/api/docs/check/:name", get(check_doc_exists).layer(middleware::from_fn(require_jwt)))
-        .route("/api/tags/:name", get(get_tags).post(update_tags).layer(middleware::from_fn(require_jwt)))
+        .route("/api/tags/:name", get(get_tags).layer(middleware::from_fn(require_jwt)))
         // Web 뷰어
         .route("/", get(redirect_to_index))
         .route("/login", get(render_login_page))
@@ -27,5 +27,5 @@ pub fn create_routes() -> Router {
         .route("/tags", get(render_all_tags).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/edit/:name", get(edit_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/:name", get(render_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
-        .route("/tag/:name", get(render_search_tags).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/tags/:name", get(render_search_tags).layer(middleware::from_fn(require_jwt_or_redirect)))
 }
