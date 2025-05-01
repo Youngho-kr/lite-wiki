@@ -35,5 +35,5 @@ pub async fn create_doc_page(Query(params): Query<HashMap<String, String>>) -> H
         .and_then(|tpl| load_template(tpl).ok())
         .unwrap_or_default();
 
-    Html(render_create_html(&title, &content))
+    Html(render_create_html(&title, &content, "user"))
 }

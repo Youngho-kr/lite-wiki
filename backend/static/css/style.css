@@ -4,6 +4,23 @@ body {
     margin: auto;
     padding: 2rem;
   }
+  h1 {
+    margin-bottom: 1rem;
+}
+ul {
+    list-style: none;
+    padding-left: 0;
+}
+li {
+    margin: 0.5rem 0;
+}
+a {
+    text-decoration: none;
+    color: #0366d6;
+}
+a:hover {
+    text-decoration: underline;
+}
   
   #topbar {
     display: flex;
@@ -120,3 +137,10 @@ body {
     cursor: pointer;
     text-decoration: none;
   }
+  #notice {
+    background: #ffe4e1;
+    color: #b00020;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+}

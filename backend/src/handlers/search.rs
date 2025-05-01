@@ -23,10 +23,10 @@ pub async fn render_search_results(
                     matches.sort();
 
                     let html = if matches.is_empty() {
-                        render_search_empty_html(keyword)
+                        render_search_empty_html(keyword, "user")
                     } else {
                         // render_search_page(keyword, &matches)
-                        render_search_result_html(keyword, &matches)
+                        render_search_result_html(keyword, &matches, "user")
                     };
 
                     Html(html).into_response()
@@ -35,19 +35,19 @@ pub async fn render_search_results(
             }
         }
         None => {
-            Html(render_search_no_input_html()).into_response()
+            Html(render_search_no_input_html("user")).into_response()
         }
     }
 }
 
 pub async fn render_search_tags(Path(tag_name): Path<String>) -> impl IntoResponse {
     match find_docs_by_tag(&tag_name) {
-        Ok(mut matched_docs) => Html(render_search_tag_html(&tag_name, &mut matched_docs)).into_response(),
+        Ok(mut matched_docs) => Html(render_search_tag_html(&tag_name, &mut matched_docs, "user")).into_response(),
         Err(_) => Html("<h1>문서 목록 불러오기 실패</h1>".to_string()).into_response(),
     }
 }
 
 pub async fn render_all_tags() -> impl IntoResponse {
     let tags = list_all_tags().unwrap_or_default();
-    Html(render_all_tags_html(&tags))
+    Html(render_all_tags_html(&tags, "user"))
 }

@@ -58,90 +58,125 @@ pub fn render_editor_html(
     render_full_page("editor.html", &vars, username)
 }
 
-pub fn render_search_result_html(keyword: &str, results: &[String]) -> String {
+pub fn render_search_result_html(
+    keyword: &str, 
+    results: &[String],
+    username: &str
+) -> String {
     let items: String = results
-        .iter()
-        .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
-        .collect();
+    .iter()
+    .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
+    .collect();
 
-    let template = load_template_file("search_result.html").unwrap_or_default();
+    let mut vars = HashMap::new();
 
-    template
-        .replace("{keyword}", keyword)
-        .replace("{results}", &items)
+    vars.insert("keyword", keyword.to_string());
+    vars.insert("results", items.to_string());
+
+    render_full_page("search_result.html", &vars, username)
 }
 
-pub fn render_search_empty_html(keyword: &str) -> String {
-    let template = load_template_file("search_empty.html").unwrap_or_default();
+pub fn render_search_empty_html(
+    keyword: &str,
+    username: &str
+) -> String {
+    let mut vars = HashMap::new();
 
-    template
-        .replace("{keyword}", keyword)
+    vars.insert("keyword", keyword.to_string());
+
+    render_full_page("search_empty.html", &vars, username)
 }
 
-pub fn render_search_no_input_html() -> String {
-    let template = load_template_file("search_no_input.html").unwrap_or_default();
-
-    template
+pub fn render_search_no_input_html(
+    username: &str
+) -> String {
+    render_full_page("search_no_input.html", &mut HashMap::new(), username)
 }
 
-pub fn render_template_list_html(template_names: &[String]) -> String {
+pub fn render_template_list_html(
+    template_names: &[String],
+    username: &str
+) -> String {
     let items = template_names
-        .iter()
-        .map(|name| {
-            let link = format!("/create?template={}", name);
-            format!(r#"<li>{} — <a href="{}">이 템플릿으로 문서 만들기</a></li>"#, name, link)
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
+    .iter()
+    .map(|name| {
+        let link = format!("/create?template={}", name);
+        format!(r#"<li>{} — <a href="{}">이 템플릿으로 문서 만들기</a></li>"#, name, link)
+    })
+    .collect::<Vec<_>>()
+    .join("\n");
 
-    let template = load_template_file("template_list.html").unwrap_or_default();
+    let mut vars = HashMap::new();
 
-    template.replace("{items}", &items)
+    vars.insert("items", items.to_string());
+
+    render_full_page("template_list.html", &vars, username)
 }
 
-pub fn render_create_html(title: &str, content: &str) -> String {
-    let template = load_template_file("create.html").unwrap_or_default();
+pub fn render_create_html(
+    title: &str, 
+    content: &str,
+    username: &str,
+) -> String {
+    let mut vars = HashMap::new();
 
-    template
-        .replace("{title}", title)
-        .replace("{html}", &serde_json::to_string(content).unwrap())
+    vars.insert("title", title.to_string());
+    vars.insert("html",serde_json::to_string(content).unwrap());
+
+    render_full_page("create.html", &vars, username)
 }
 
-pub fn render_doc_list_html(doc_names: &mut [String]) -> String {
+pub fn render_doc_list_html(
+    doc_names: &mut [String],
+    username: &str,
+) -> String {
     doc_names.sort();
     let items = doc_names
-        .iter()
-        .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
-        .collect::<Vec<_>>()
-        .join("\n");
+    .iter()
+    .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
+    .collect::<Vec<_>>()
+    .join("\n");
 
-    let template = load_template_file("doc_list.html").unwrap_or_default();
+    let mut vars = HashMap::new();
 
-    template.replace("{items}", &items)
+    vars.insert("items", items.to_string());
+
+    render_full_page("doc_list.html", &vars, username)
 }
 
-pub fn render_search_tag_html(tag: &str, docs: &mut [String]) -> String {
+pub fn render_search_tag_html(
+    tag: &str, 
+    docs: &mut [String],
+    username: &str,
+) -> String {
     docs.sort();
     let items = docs.iter()
         .map(|doc| format!(r#"<li><a href="/{}">{}</a></li>"#, doc, doc))
         .collect::<Vec<_>>()
         .join("\n");
 
-    let template = load_template_file("search_tag.html").unwrap_or_default();
+    let mut vars = HashMap::new();
 
-    template
-        .replace("{tag}", tag)
-        .replace("{items}", &items)
+    vars.insert("tag", tag.to_string());
+    vars.insert("items", items.to_string());
+
+    render_full_page("search_tag.html", &vars, username)
 }
 
-pub fn render_all_tags_html(tags: &[String]) -> String {
+pub fn render_all_tags_html(
+    tags: &[String],
+    username: &str,
+) -> String {
     let items = tags.iter()
         .map(|tag| format!(r#"<li><a href="/tags/{}" class="tag">#{}</a></li>"#, tag, tag))
         .collect::<Vec<_>>()
         .join("\n");
 
-    let template = load_template_file("tag_list.html").unwrap_or_default();
-    template.replace("{items}", &items)
+    let mut vars = HashMap::new();
+
+    vars.insert("items", items.to_string());
+
+    render_full_page("tag_list.html", &vars, username)
 }
 
 pub fn render_login_page_html() -> String {
