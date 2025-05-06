@@ -38,6 +38,7 @@ JWT_SECRET_KEY=<your_secret_key>
 ```
 1. `JWT_SECRET_KEY`의 값을 설정
 2. 폴더 경로를 원하는 대로 수정
+3. admin / 1234 로그인
 
 ### Docker 배포
 ```
@@ -49,7 +50,10 @@ http://localhost:3000
 
 | 경로 | 설명 |
 |------|------|
-| `/index` | 기본 문서 |
+| `/` | 위키 메인 페이지 |
 | `/docs` | 전체 문서 목록 |
+| `/tags` | 전체 태그 목록 |
+| `/admin` | 설정 |
+| `/문서명` | 문서 내용 |
 | `/edit/문서명` | 문서 편집 |
 | `/templates` | 템플릿 목록 |
