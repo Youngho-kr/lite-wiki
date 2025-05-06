@@ -26,11 +26,10 @@ lite-wiki/
 ```
 
 ## 시작
-### 환경 변수 설정
+### 초기 설정
 ```
 # .env
-DATA_PATH=./data/docs
-TEMPLATE_PATH=./data/templates
+
 ```
 ### Docker 배포
 ```

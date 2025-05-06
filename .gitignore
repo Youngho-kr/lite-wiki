@@ -17,12 +17,19 @@ target/
 #.idea/
 
 # Docs
-data/
+data/docs/*
+!data/.gitkeep
+
+data/templates/*
+!data/.gitkeep
+
 data_test/
 
-# env
-.env
-.env.test
+# Markdown files
+*.md
+
+# MetaData
+*.meta.json
 
 # MacOS
 .DS_Store
