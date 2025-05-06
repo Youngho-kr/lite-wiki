@@ -7,6 +7,7 @@ pub mod search;
 pub mod html_render;
 pub mod auth;
 pub mod admin;
+pub mod random;
 
 pub use api::*;
 pub use view::*;
@@ -17,3 +18,4 @@ pub use search::*;
 pub use html_render::*;
 pub use auth::*;
 pub use admin::*;
+pub use random::*;

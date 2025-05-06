@@ -29,6 +29,7 @@ pub fn create_routes() -> Router {
         .route("/search", get(render_search_results).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/create", get(create_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/tags", get(render_all_tags).layer(middleware::from_fn(require_jwt_or_redirect)))
+        .route("/random", get(random_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/:name", get(render_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/edit/:name", get(edit_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/tags/:name", get(render_search_tags).layer(middleware::from_fn(require_jwt_or_redirect)))
