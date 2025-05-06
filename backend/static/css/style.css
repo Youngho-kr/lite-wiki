@@ -23,24 +23,27 @@ a:hover {
 }
   
   #topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 1.5rem;
-    /* border-bottom: 1px solid #ddd; */
-    gap: 1rem;
   }
 
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 200px;
+  }
+
+  
   .nav-button {
     display: inline-block;
     padding: 4px 10px;
-    margin-right: 6px;
+    font-size: 13px;
     background: linear-gradient(to bottom, #ffffff, #f9f9f9);
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 13px;
-    color: #333;
     text-decoration: none;
+    color: #333;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     transition: background 0.2s ease, box-shadow 0.2s ease;
   }
@@ -50,7 +53,14 @@ a:hover {
     box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   }
 
-  #topbar .topbar-right {
+  .topbar-utility {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+  }
+
+  .user-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -58,7 +68,7 @@ a:hover {
   
   .search-form input[type="text"] {
     padding: 4px 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     border: 1px solid #ccc;
     border-radius: 4px;
   }
@@ -68,9 +78,12 @@ a:hover {
     border: 1px solid #ccc;
     padding: 4px 8px;
     border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1.4;
     text-decoration: none;
     color: #333;
   }
+  
   
   #logout:hover {
     background: #ddd;
@@ -86,6 +99,13 @@ a:hover {
     width: 100%;
     font-size: 1.1rem;
     box-sizing: border-box;
+  }
+
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
   }
   
   #editor {
@@ -105,12 +125,7 @@ a:hover {
   #edit-btn:hover {
     background: #ddd;
   }
-  
-  #search-form input {
-    padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
+
   
   #tags {
     margin-bottom: 1rem;
@@ -137,6 +152,7 @@ a:hover {
     cursor: pointer;
     text-decoration: none;
   }
+
   #notice {
     background: #ffe4e1;
     color: #b00020;

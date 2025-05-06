@@ -12,14 +12,18 @@
       <a href="/", class="nav-button">🏠 홈</a>
       <a href="/docs", class="nav-button">📄 문서</a>
       <a href="/tags", class="nav-button">🏷️ 태그</a>
+      <a href="/templates" class="nav-button">🧩 템플릿</a>
+      <a href="/random" class="nav-button">🎲 랜덤</a>
       <a href="/admin", class="nav-button">🔧 관리자</a>
     </div>
-    <div class="topbar-right">
+    <div class="topbar-utility">
         <form action="/search" method="get" class="search-form">
           <input type="text" name="q" placeholder="🔍" />
         </form>
-        <span>{username}</span>
-        <a id="logout" href="/api/logout">로그아웃</a>
+        <div class="user-info">
+          <span>{username}</span>
+          <a id="logout" href="/api/logout">로그아웃</a>
+        </div>
     </div>
   </div>
   <div>

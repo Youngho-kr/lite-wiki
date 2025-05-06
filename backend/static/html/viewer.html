@@ -1,14 +1,16 @@
 <body>
-    <div id="topbar">
-        <h1>{title}</h1>
-        <a id="edit-btn" href="/edit/{title}">✏️ 수정</a>
-    </div>
-
-    <div id="tags">{tags}</div>
-
-    <div id="viewer"></div>
-
-    {history_section}
+    <main>
+        <header class="doc-header">
+          <h1>{title}</h1>
+          <a id="edit-btn" href="/edit/{title}">✏️ 수정</a>
+        </header>
+    
+        <div id="tags">{tags}</div>
+    
+        <div id="viewer"></div>
+    
+        {history_section}
+      </main>
 
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     <script>
