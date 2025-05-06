@@ -29,8 +29,16 @@ lite-wiki/
 ### 초기 설정
 ```
 # .env
+DATA_PATH=./data/docs
+TEMPLATE_PATH=./data/templates
+USER_DB_PATH=./data/users.json
+SETTINGS_PATH=./data/settings.json
 
+JWT_SECRET_KEY=<your_secret_key>
 ```
+1. `JWT_SECRET_KEY`의 값을 설정
+2. 폴더 경로를 원하는 대로 수정
+
 ### Docker 배포
 ```
 docker compose up --build
