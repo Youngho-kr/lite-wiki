@@ -1,4 +1,4 @@
-use crate::storage::*;
+use crate::{auth::User, storage::*};
 use std::collections::HashMap;
 
 fn render_template(template_name: &str, vars: &HashMap<&str, String>) -> String {
@@ -24,6 +24,37 @@ fn render_layout(content: &str, username: &str) -> String {
 fn render_full_page(template_name: &str, vars: &HashMap<&str, String>, username: &str) -> String {
     let content = render_template(template_name, vars);
     render_layout(&content, username)
+}
+
+pub fn render_admin_page_html(
+    users: &[User],
+    redirect_page: &str, 
+    username: &str
+) -> String {
+    let user_rows = users
+        .iter()
+        .map(|user| {
+            let admin_icon = if user.is_admin { "👑" } else { "" };
+            let auth_checked = if user.is_authorized { "checked" } else { "" };
+            format!(
+                r#"<tr data-username="{username}">
+                    <td>{username}</td>
+                    <td><input type="checkbox" class="auth" {auth_checked}></td>
+                    <td>{admin_icon}</td>
+                </tr>"#,
+                username = user.username,
+                auth_checked = auth_checked,
+                admin_icon = admin_icon,
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let mut vars = std::collections::HashMap::new();
+    vars.insert("user_table", user_rows);
+    vars.insert("redirect_page", redirect_page.to_string());
+
+    render_full_page("admin.html", &vars, username)
 }
 
 pub fn render_viewer_html(

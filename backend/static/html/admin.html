@@ -1,0 +1,53 @@
+<body>
+    <h1>🔧 관리자 페이지</h1>
+  
+    <div>
+      <h2>사용자 목록</h2>
+      <form id="admin-form">
+        <table>
+          <thead>
+            <tr>
+              <th>사용자</th>
+              <th>승인</th>
+              <th>관리자</th>
+            </tr>
+          </thead>
+          <tbody>
+            {user_table}
+          </tbody>
+        </table>
+  
+        <h2>기본 리다이렉트 페이지</h2>
+        <input type="text" name="redirect_target" value="{redirect_page}" />
+        <br><br>
+        <button type="submit" id="saveBtn">💾 저장</button>
+      </form>
+    </div>
+  
+    <script>
+      document.getElementById("admin-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+  
+        const users = Array.from(document.querySelectorAll("tr[data-username]"))
+        .map(row => {
+          const username = row.dataset.username;
+          const isAuthorized = row.querySelector(".auth")?.checked || false;
+          return { username, is_authorized: isAuthorized };
+        });
+
+        const redirect_page = document.querySelector("input[name='redirect_target']").value.trim();
+  
+        const res = await fetch("/api/admin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ users, redirect_page }),
+        });
+  
+        if (res.ok) {
+          alert("저장 완료!");
+        } else {
+          alert("저장 실패");
+        }
+      });
+    </script>
+  </body>

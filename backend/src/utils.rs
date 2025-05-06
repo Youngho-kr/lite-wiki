@@ -1,5 +1,5 @@
 use std::path::Path;
-use crate::config::{DATA_PATH, TEMPLATE_PATH, USER_DB_PATH};
+use crate::config::{DATA_PATH, TEMPLATE_PATH, USER_DB_PATH, SETTINGS_PATH};
 
 pub fn check_environment_directories() {
     if !Path::new(&*DATA_PATH).is_dir() {
@@ -10,5 +10,9 @@ pub fn check_environment_directories() {
     }
     if !Path::new(&*USER_DB_PATH).exists() {
         panic!("USER_DB_PATH does not exist: {:?}", *USER_DB_PATH);
+    }
+
+    if !Path::new(&*SETTINGS_PATH).exists() {
+        panic!("SETTINGS_PATH does not exist: {:?}", *SETTINGS_PATH);
     }
 }

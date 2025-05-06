@@ -1,9 +1,7 @@
 use axum::response::Redirect;
 
-pub async fn redirect_to_login() -> Redirect {
-    Redirect::temporary("/login")
-}
+use crate::config::get_redirect_page;
 
-pub async fn redirect_to_index() -> Redirect {
-    Redirect::temporary("/index")
+pub async fn redirect_to_root() -> Redirect {
+    Redirect::to(&get_redirect_page())
 }
