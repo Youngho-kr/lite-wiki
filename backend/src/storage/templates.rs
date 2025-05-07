@@ -19,7 +19,6 @@ pub fn load_template(name: &str) -> io::Result<String> {
     fs::read_to_string(path)
 }
 
-
 #[cfg(test)]
 mod tests {
     use std::{fs, path::PathBuf};
