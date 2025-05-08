@@ -1,0 +1,32 @@
+<h3>🔑 비밀번호 변경</h3>
+
+<form id="change-form" class="form-box">
+  <label for="current">현재 비밀번호</label>
+  <input type="password" id="current" placeholder="현재 비밀번호" required />
+
+  <label for="new">새 비밀번호</label>
+  <input type="password" id="new" placeholder="새 비밀번호" required />
+
+  <button type="submit" class="small-button">변경</button>
+</form>
+
+<script>
+  document.getElementById("change-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const current = document.getElementById("current").value.trim();
+    const newPass = document.getElementById("new").value.trim();
+
+    const res = await fetch("/api/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current, new: newPass }),
+    });
+
+    if (res.ok) {
+      alert("비밀번호가 변경되었습니다.");
+      location.href = "/";
+    } else {
+      alert("비밀번호 변경 실패");
+    }
+  });
+</script>

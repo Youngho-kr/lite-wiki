@@ -4,5 +4,11 @@
     "password_hash": "$argon2id$v=19$m=19456,t=2,p=1$hfmiHFvnzptPnU0NhAcXhA$vVAIovNBs4mGrI7Kta7vCaDXCXspzbZmf9/vJ88SOBo",
     "is_admin": true,
     "is_authorized": true
+  },
+  {
+    "username": "1",
+    "password_hash": "$argon2id$v=19$m=19456,t=2,p=1$vxWK/i8w1INjggovkLG3/Q$+7Mh9wskUhlPpA/CuhpctFW6IdL6cQIyq1seANV8Wjc",
+    "is_admin": false,
+    "is_authorized": true
   }
 ]

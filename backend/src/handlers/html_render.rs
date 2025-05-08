@@ -26,6 +26,12 @@ fn render_full_page(template_name: &str, vars: &HashMap<&str, String>, username:
     render_layout(&content, username)
 }
 
+pub fn render_user_info_html(
+    username: &str,
+) -> String {
+    render_full_page("user_info.html", &HashMap::new(), username)
+}
+
 pub fn render_admin_page_html(
     users: &[User],
     redirect_page: &str, 

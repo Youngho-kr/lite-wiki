@@ -8,10 +8,9 @@ use headers::Cookie as HeaderCookie;
 use jsonwebtoken::{decode, encode, errors::Error as JwtError, Header, DecodingKey, EncodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use cookie::{time, Cookie, SameSite};
+use crate::auth::storage::get_user_by_name;
 
 use crate::config::JWT_SECRET;
-
-use super::load_users;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -108,8 +107,7 @@ pub async fn require_admin(req: Request<axum::body::Body>, next: Next) -> Result
         Err(_) => return Err(StatusCode::UNAUTHORIZED),
     };
 
-    let users = load_users().unwrap_or_default();
-    let user = users.iter().find(|u| u.username == username);
+    let user = get_user_by_name(&username);
 
     match user {
         Some(u) if u.is_admin => Ok(next.run(req).await),
@@ -129,9 +127,8 @@ pub async fn require_admin_or_redirect(req: Request<axum::body::Body>, next: Nex
         Err(_) => return Ok(Redirect::to("/").into_response()),
     };
 
-    let users = load_users().unwrap_or_default();
-    let user = users.iter().find(|u| u.username == username);
-
+    let user = get_user_by_name(&username);
+    
     match user {
         Some(u) if u.is_admin => Ok(next.run(req).await),
         _ => Ok(Redirect::to("/").into_response()),
