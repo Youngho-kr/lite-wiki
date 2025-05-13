@@ -1,16 +1,25 @@
 use axum::{middleware, routing::{delete, get, post}, Router};
-use tower_http::services::ServeDir;
-use crate::{auth::{require_admin, require_admin_or_redirect, require_jwt, require_jwt_or_redirect}, handlers::*};
+use tower_http::{trace::{self, TraceLayer}, services::ServeDir};
+use tracing::Level;
+
+use crate::{auth::*, handlers::*};
 
 pub fn create_routes() -> Router {
     Router::new()
+        // 로그
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+                .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
+                .on_response(trace::DefaultOnResponse::new().level(Level::INFO))
+        )
         // css
         .nest_service("/static", ServeDir::new("static"))
         // Auth
         .route("/api/login", post(handle_login))
         .route("/api/signup", post(handle_signup))
         .route("/api/logout", get(handle_logout))
-        .route("/api/change-password", post(handle_change_password))
+        .route("/api/change-password", post(handle_change_password).layer(middleware::from_fn(require_jwt)))
         // Admin
         .route("/api/admin", post(save_admin_setting).layer(middleware::from_fn(require_admin)))
         // REST API

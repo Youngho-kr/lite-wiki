@@ -2,6 +2,7 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::{env, fs, sync::RwLock};
 
+// Required environment variables (panic on missing)
 pub static DATA_PATH: Lazy<String> = Lazy::new(|| env_required("DATA_PATH"));
 pub static TEMPLATE_PATH: Lazy<String> = Lazy::new(|| env_required("TEMPLATE_PATH"));
 pub static USER_DB_PATH: Lazy<String> = Lazy::new(|| env_required("USER_DB_PATH"));
@@ -12,32 +13,37 @@ fn env_required(key: &str) -> String {
     env::var(key).unwrap_or_else(|_| panic!("Mssing {} in .env", key))
 }
 
+// Settings structure for persistent config
 #[derive(Serialize, Deserialize)]
 pub struct Settings {
     pub redirect_page: String,
 }
 
+// In-memory cached redirect page (loaded from settings file)
 pub static REDIRECT_PAGE: Lazy<RwLock<String>> = Lazy::new(|| {
-    let settings_json = fs::read_to_string(SETTINGS_PATH.clone()).expect("Failed to read settings file");
-    let settings: Settings = serde_json::from_str(&settings_json).expect("invalid settings.json format");
+    let settings_json = fs::read_to_string(&*SETTINGS_PATH).expect("Failed to read settings.json file");
+    let settings: Settings = serde_json::from_str(&settings_json).expect("Invalid settings.json format");
     RwLock::new(settings.redirect_page)
 });
 
-pub fn get_redirect_page() -> String {
+// Get the currently configured redirect page (read from in-memory cache)
+pub fn current_redirect_page() -> String {
     REDIRECT_PAGE.read().unwrap().clone()
 }
 
-pub fn save_redirect_setting(redirect: &str) -> std::io::Result<()> {
+// Update redirect page to both memory and file
+pub fn update_redirect_page(redirect: &str) -> std::io::Result<()> {
     let redirect_to = if redirect.starts_with('/') {
-        redirect
+        redirect.to_string()
     } else {
-        &format!("/{}", redirect)
+        format!("/{}", redirect)
     };
 
-    let settings = Settings {
-        redirect_page: redirect_to.to_string(),
-    };
+    let setting_json = fs::read_to_string(&*SETTINGS_PATH)?;
+    let mut settings: Settings = serde_json::from_str(&setting_json)?;
 
+    settings.redirect_page = redirect_to.clone();
+    
     let json = serde_json::to_string_pretty(&settings)?;
     fs::write(SETTINGS_PATH.as_str(), json)?;
 

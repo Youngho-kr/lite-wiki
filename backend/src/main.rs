@@ -1,4 +1,5 @@
 use tokio::net::TcpListener;
+use tracing::{error, info};
 use tracing_subscriber;
 use dotenvy::dotenv;
 
@@ -7,17 +8,29 @@ use lite_wiki_backend::utils::check_environment_directories;
 
 #[tokio::main]
 async fn main() {
+    // Load environment data from .env
     dotenv().ok();
+
+    // Ensure required data path exists
     check_environment_directories();
 
+    // Initialize tracing subscriber (logger)
     tracing_subscriber::fmt::init();
 
+    // Create the application routes
     let app = create_routes();
 
-    // 모든 인터페이스에서 수신 가능하도록 수정
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
-
-    println!("Lite Wiki API running at http://0.0.0.0:3000");
-
-    axum::serve(listener, app).await.unwrap();
+    // Bind to address
+    let address = "0.0.0.0:3000";
+    match TcpListener::bind(address).await {
+        Ok(listner) => {
+            info!("Lite Wiki is running at http://{}", address);
+            if let Err(e) = axum::serve(listner, app).await {
+                error!("Server error: {}", e);
+            }
+        }
+        Err(e) => {
+            error!("Failed to bind to address {}: {}", address, e);
+        }
+    }
 }
