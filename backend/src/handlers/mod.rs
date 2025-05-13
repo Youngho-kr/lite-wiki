@@ -8,6 +8,7 @@ pub mod html_render;
 pub mod auth;
 pub mod admin;
 pub mod random;
+pub mod image;
 
 pub use api::*;
 pub use view::*;
@@ -19,3 +20,4 @@ pub use html_render::*;
 pub use auth::*;
 pub use admin::*;
 pub use random::*;
+pub use image::*;

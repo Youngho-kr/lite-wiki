@@ -20,6 +20,53 @@
       initialEditType: 'markdown',
       previewStyle: 'vertical',
       initialValue: markdownContent,
+      hooks: {
+        addImageBlobHook: async (blob, callback) => {
+          const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+          if (!allowedTypes.includes(blob.type)) {
+            alert('Not a valid image type. Please upload a PNG, JPEG, WEBP, or GIF image.');
+            return;
+          }
+
+          let desiredName = prompt("Enter a name for the image (optional):");
+          if (desiredName === null) return;
+          desiredName = desiredName.trim();
+          if (desiredName === "") {
+            alert('Image name cannot be empty.');
+            throw new Error('Image name is required.');
+          }
+
+          const formData = new FormData();
+          formData.append('file', blob);
+
+          const params = new URLSearchParams();
+          if (desiredName) {
+            params.append('filename', desiredName);
+          }
+
+          try {
+            const response = await fetch(`/api/images?${params}`, {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!response.ok) {
+              if (response.status === 409) {
+                alert('Image name already exists. Please choose a different name.');
+              } else {
+                alert('Failed to upload image. Please try again.');
+              }
+              return;
+            }
+
+            const imageUrl = await response.text();
+
+            callback(imageUrl, desiredName);
+          } catch (error) {
+            alert(error.message);
+          }
+        }
+      }
     });
 
     // 태그 관련 로직
