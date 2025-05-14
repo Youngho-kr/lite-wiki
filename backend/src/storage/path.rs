@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use crate::config::DATA_PATH;
+use crate::config::{DOCS_PATH, UPLOADS_PATH};
 
 pub fn doc_path(name: &str) -> PathBuf {
     docs_dir_path().join(format!("{name}.md"))
@@ -10,5 +10,13 @@ pub fn doc_meta_path(name: &str) -> PathBuf {
 }
 
 pub fn docs_dir_path() -> PathBuf {
-    DATA_PATH.clone().into()
+    DOCS_PATH.clone().into()
+}
+
+pub fn uploads_path(name: &str, extension: &str) -> PathBuf {
+    uploads_dir_path().join(format!("{name},{extension}"))
+}
+
+pub fn uploads_dir_path() -> PathBuf {
+    UPLOADS_PATH.clone().into()
 }

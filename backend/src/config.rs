@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::{env, fs, sync::RwLock};
 
 // Required environment variables (panic on missing)
-pub static DATA_PATH: Lazy<String> = Lazy::new(|| env_required("DATA_PATH"));
+pub static DOCS_PATH: Lazy<String> = Lazy::new(|| env_required("DOCS_PATH"));
+pub static UPLOADS_PATH: Lazy<String> = Lazy::new(|| env_required("UPLOADS_PATH"));
 pub static TEMPLATE_PATH: Lazy<String> = Lazy::new(|| env_required("TEMPLATE_PATH"));
 pub static USER_DB_PATH: Lazy<String> = Lazy::new(|| env_required("USER_DB_PATH"));
 pub static SETTINGS_PATH: Lazy<String> = Lazy::new(|| env_required("SETTINGS_PATH"));

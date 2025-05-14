@@ -11,8 +11,7 @@ use tokio::fs;
 use uuid::Uuid;
 use std::path::Path as StdPath;
 
-const ALLOWED_EXTENSION: [&str; 5] = ["png", "jpg", "jpeg", "webp", "gif"];
-const UPLOAD_DIR: &str = "data/uploads/";
+use crate::storage::{file, ALLOWED_EXTENSIONS};
 
 #[derive(Deserialize)]
 pub struct UploadParams {
@@ -23,41 +22,32 @@ pub async fn upload_image(
     Query(params): Query<UploadParams>,
     mut multipart: Multipart
 ) -> Result<String, StatusCode> {
-    let filename_regex = Regex::new(r"[^\w\d_-]").unwrap();
+    let field = multipart.next_field().await.map_err(|_| StatusCode::BAD_REQUEST)?
+        .ok_or(StatusCode::BAD_REQUEST)?;
 
-    while let Some(field) = multipart.next_field().await.map_err(|_| StatusCode::BAD_REQUEST)? {
-        let original_filename = field.file_name().unwrap_or("file");
+    let original_filename = field.file_name().unwrap_or("file");
+    let extension = std::path::Path::new(original_filename)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_lowercase())
+        .ok_or(StatusCode::UNSUPPORTED_MEDIA_TYPE)?;
 
-        let extension = StdPath::new(original_filename)
-            .extension()
-            .and_then(|ext| ext.to_str())
-            .map(|ext| ext.to_lowercase())
-            .ok_or(StatusCode::UNSUPPORTED_MEDIA_TYPE)?;
-
-        if !ALLOWED_EXTENSION.contains(&extension.as_str()) {
-            return Err(StatusCode::UNSUPPORTED_MEDIA_TYPE)
-        }
-
-        let base_filename = match params.filename {
-            Some(ref name) if !name.trim().is_empty() => name.trim().to_string(),
-            _ => Uuid::new_v4().to_string(),
-        };
-
-        let safe_filename = filename_regex.replace_all(&base_filename, "_");
-        let final_filename = format!("{}.{}", safe_filename, extension);
-        let filepath = format!("{}{}", UPLOAD_DIR, final_filename);
-
-        if StdPath::new(&filepath).exists() {
-            return Err(StatusCode::CONFLICT);
-        }
-
-        let data = field.bytes().await.map_err(|_| StatusCode::BAD_REQUEST)?;
-        fs::write(&filepath, &data).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
-        return Ok(format!("/api/images/{}", final_filename));
+    if !ALLOWED_EXTENSIONS.contains(&&extension.as_str()) {
+        return Err(StatusCode::UNSUPPORTED_MEDIA_TYPE);
     }
 
-    Err(StatusCode::BAD_REQUEST)
+    let safe_filename = file::generate_filename(params.filename.as_deref(), &extension);
+
+    let data = field.bytes().await.map_err(|_| StatusCode::BAD_REQUEST)?;
+    file::save_file(&safe_filename, &data)
+        .await
+        .map_err(|err| if err.kind() == std::io::ErrorKind::AlreadyExists {
+            StatusCode::CONFLICT
+        } else {
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(format!("/api/images/{}", safe_filename))
 }
 
 pub async fn serve_image(Path(filename): Path<String>) -> impl IntoResponse {
