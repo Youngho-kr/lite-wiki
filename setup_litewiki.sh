@@ -63,22 +63,38 @@ mkdir -p ~/lite-wiki
 cd ~/lite-wiki
 
 cat <<EOF > docker-compose.yml
+version: '3.8'
+
 services:
-  lite-wiki:
-    build: ./backend
+  wiki:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lite-wiki
     ports:
-      - "${CONTAINER_PORT}:${INTERNAL_PORT}"
+      - "${EXTERNAL_PORT}:${INTERNAL_PORT}"
     environment:
       BASE_URL: https://${DOMAIN}/wiki
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      DOCS_PATH: ${DOCS_PATH}
-      UPLOADS_PATH: ${UPLOADS_PATH}
-      USER_DB_PATH: ${USER_DB_PATH}
-      SETTINGS_PATH: ${SETTINGS_PATH}
+      DOCS_PATH: /data/docs
+      UPLOADS_PATH: /data/uploads
+      USER_DB_PATH: /data/users.json
+      SETTINGS_PATH: /data/settings.json
+    volumes:
+      - ${DOCS_PATH}:/data/docs
+      - ${UPLOADS_PATH}:/data/uploads
+      - ${USER_DB_PATH}:/data/users.json
+      - ${SETTINGS_PATH}:/data/settings.json
+    restart: unless-stopped
 EOF
 
 # 3-2. Docker 컨테이너 실행
-sudo docker compose up --build -d
+if command -v docker compose &> /dev/null; then
+    sudo docker compose up --build -d
+else
+    sudo docker-compose build
+    sudo docker-compose up -d
+fi
 
 # 4. NGINX 설정
 sudo tee /etc/nginx/sites-available/wiki <<EOF
@@ -87,7 +103,7 @@ server {
     server_name ${DOMAIN};
 
     location /wiki/ {
-        proxy_pass http://localhost:${CONTAINER_PORT}/;
+        proxy_pass http://localhost:${EXTERNAL_PORT}/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         rewrite ^/wiki/(.*)\$ /\$1 break;
