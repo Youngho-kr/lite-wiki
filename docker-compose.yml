@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  lite-wiki:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lite-wiki
+    ports:
+      - "3001:3000"  # 외부 포트:컨테이너 포트
+    environment:
+      BASE_URL: https://wiki.example.com/wiki  # 실제 도메인으로 수정
+      JWT_SECRET_KEY: your_strong_secret_key   # 반드시 강력한 비밀키로 변경
+      DOCS_PATH: /data/docs
+      UPLOADS_PATH: /data/uploads
+      USER_DB_PATH: /data/users.json
+      SETTINGS_PATH: /data/settings.json
+    volumes:
+      - ./data/docs:/data/docs
+      - ./data/uploads:/data/uploads
+      - ./data/users.json:/data/users.json
+      - ./data/settings.json:/data/settings.json
+    restart: unless-stopped
