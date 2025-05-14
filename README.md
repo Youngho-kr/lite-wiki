@@ -42,10 +42,13 @@ USER_DB_PATH=./data/users.json
 SETTINGS_PATH=./data/settings.json
 
 JWT_SECRET_KEY=<your_secret_key>
+
+BASE_URL=<your_domain>
 ```
 1. `JWT_SECRET_KEY` 값을 반드시 설정하세요.
 2. 필요한 경우 폴더 경로를 수정하세요.
-3. 기본 관리자 계정으로 로그인
+3. `BASE_URL` 값에 도메인 URL을 설정하세요.
+4. 기본 관리자 계정으로 로그인
     - ID: admin
     - PW: 1234
 
@@ -54,8 +57,8 @@ JWT_SECRET_KEY=<your_secret_key>
 docker compose up --build
 ```
 
-## 웹 접속 (수정 예정)
-http://localhost:3000
+## 웹 접속
+`BASE_URL`에 작성한 링크로 접속
 
 | 경로 | 설명 |
 |------|------|
