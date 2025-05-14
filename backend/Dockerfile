@@ -1,16 +1,16 @@
-FROM rust:1.85
+FROM rust:1.85 as builder
 
 WORKDIR /usr/src/app
 COPY . .
-
 RUN cargo build --release
 
-WORKDIR /lite-wiki
-RUN cp /usr/src/app/target/release/lite-wiki-backend /usr/local/bin/lite-wiki
+FROM ubuntu:24.04
 
-COPY data ./data
-COPY .env .env
+WORKDIR /lite-wiki
+
+COPY --from=builder /usr/src/app/target/release/lite-wiki-backend /usr/local/bin/lite-wiki
 COPY static ./static
+VOLUME ["/data/docs", "/data/uploads", "/data"]
 
 EXPOSE 3000
 CMD ["lite-wiki"]
