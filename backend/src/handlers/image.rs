@@ -5,11 +5,8 @@ use axum::{
 };
 use axum_extra::extract::Multipart;
 use mime_guess::MimeGuess;
-use regex::Regex;
 use serde::Deserialize;
 use tokio::fs;
-use uuid::Uuid;
-use std::path::Path as StdPath;
 
 use crate::storage::{file, ALLOWED_EXTENSIONS};
 
