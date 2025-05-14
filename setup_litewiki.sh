@@ -52,8 +52,44 @@ INTERNAL_PORT=${INTERNAL_PORT:-3000}
 echo "- 컨테이너 내부 포트: $INTERNAL_PORT"
 
 # 2. 필수 패키지 설치
-sudo apt update
-sudo apt install -y docker.io docker-compose nginx certbot python3-certbot-nginx ufw
+install_if_missing() {
+    if ! command -v "$1" &> /dev/null; then
+        echo "🔧 $1 설치 중..."
+        sudo apt install -y "$1"
+    fi
+}
+
+# Docker 설치
+if ! command -v docker &> /dev/null; then
+    echo "🐳 Docker 설치 중..."
+    sudo apt update
+    sudo apt install -y ca-certificates curl gnupg lsb-release
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.gpg > /dev/null
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+      https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt update
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    sudo systemctl enable --now docker
+fi
+
+# Docker Compose V2 확인
+if ! docker compose version &> /dev/null; then
+    echo "⚙️  Docker Compose V2 플러그인 설치..."
+    sudo apt install -y docker-compose-plugin
+fi
+
+# NGINX 설치
+install_if_missing "nginx"
+
+# Certbot (HTTPS 인증서) 설치
+install_if_missing "certbot"
+install_if_missing "python3-certbot-nginx"
+
+# UFW (방화벽) 설치
+install_if_missing "ufw"
 
 # 3. Docker 시작
 sudo systemctl enable --now docker
