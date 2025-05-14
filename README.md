@@ -32,7 +32,24 @@ lite-wiki/
 └── README.md
 ```
 
-## 시작
+## 배포
+### 1. 서버 준비
+- OS: Ubuntu 20.04 이상 (권장)
+- 필수 포트 오픈: 80(HTTP), 443(HTTPS)
+- 도메인 준비
+
+### 2. 소스 코드 다운로드
+```bash
+git clone https://
+cd lite-wiki
+```
+
+### 3. 배포 스크립트 실행
+```bash
+chmod +x setup_litewiki.sh
+./setup_litewiki.sh
+```
+
 ### 초기 설정
 ```
 # .env
