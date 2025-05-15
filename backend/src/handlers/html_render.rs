@@ -152,13 +152,12 @@ pub fn render_template_list_html(
 
 pub fn render_create_html(
     title: &str, 
-    content: &str,
     username: &str,
 ) -> String {
     let mut vars = HashMap::new();
 
     vars.insert("title", title.to_string());
-    vars.insert("html",serde_json::to_string(content).unwrap());
+    vars.insert("html",serde_json::to_string("").unwrap());
 
     render_full_page("create.html", &vars, username)
 }

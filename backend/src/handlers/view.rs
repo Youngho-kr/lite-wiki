@@ -5,7 +5,7 @@ use axum::{
     response::{Html, IntoResponse, Redirect}
 };
 use crate::{auth::AuthUser, handlers::html_render::*};
-use crate::storage::{load_doc, load_doc_meta, load_template};
+use crate::storage::{load_doc, load_doc_meta};
 
 pub async fn render_doc_page(
     Path(title): Path<String>, 
@@ -39,10 +39,5 @@ pub async fn create_doc_page(
 ) -> Html<String> {
     let title = params.get("title").cloned().unwrap_or_default();
 
-    let content = params
-        .get("template")
-        .and_then(|tpl| load_template(tpl).ok())
-        .unwrap_or_default();
-
-    Html(render_create_html(&title, &content, &username))
+    Html(render_create_html(&title, &username))
 }

@@ -1,5 +1,5 @@
 use std::path::Path;
-use crate::config::{DOCS_PATH, SETTINGS_PATH, TEMPLATE_PATH, UPLOADS_PATH, USER_DB_PATH};
+use crate::config::{DOCS_PATH, SETTINGS_PATH, UPLOADS_PATH, USER_DB_PATH};
 
 pub fn check_environment_directories() {
     if !Path::new(&*DOCS_PATH).is_dir() {
@@ -8,13 +8,9 @@ pub fn check_environment_directories() {
     if !Path::new(&*UPLOADS_PATH).is_dir() {
         panic!("UPLOADS_PATH does not exist: {:?}", *UPLOADS_PATH);
     }
-    if !Path::new(&*TEMPLATE_PATH).is_dir() {
-        panic!("TEMPLATE_PATH does not exist: {:?}", *TEMPLATE_PATH);
-    }
     if !Path::new(&*USER_DB_PATH).exists() {
         panic!("USER_DB_PATH does not exist: {:?}", *USER_DB_PATH);
     }
-
     if !Path::new(&*SETTINGS_PATH).exists() {
         panic!("SETTINGS_PATH does not exist: {:?}", *SETTINGS_PATH);
     }
