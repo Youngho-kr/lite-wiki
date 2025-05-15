@@ -2,10 +2,12 @@ use std::collections::HashMap;
 
 use axum::{
     extract::{Path, Query}, 
-    response::{Html, IntoResponse, Redirect}
+    response::{Html, IntoResponse}
 };
 use crate::{auth::AuthUser, handlers::html_render::*};
 use crate::storage::{load_doc, load_doc_meta};
+
+use super::redirec_to_page;
 
 pub async fn render_doc_page(
     Path(title): Path<String>, 
@@ -16,7 +18,7 @@ pub async fn render_doc_page(
             let meta = load_doc_meta(&title).unwrap_or_default();
             Html(render_viewer_html(&title, &md_content, &meta.tags, &meta.history, &username)).into_response()
         }
-        Err(_) => Redirect::to(&format!("/create?title={}", title)).into_response(),
+        Err(_) => redirec_to_page(&format!("create?title={}", title)).into_response()
     }
 }
 
@@ -29,7 +31,7 @@ pub async fn edit_doc_page(
             let meta = load_doc_meta(&title).unwrap_or_default();
             Html(render_editor_html(&title, &md_content, &meta.tags, &username)).into_response()
         }
-        Err(_) => Redirect::to(&format!("/create?title={}", title)).into_response(),
+        Err(_) => redirec_to_page(&(format!("create?title={}", title))).into_response()
     }
 }
 

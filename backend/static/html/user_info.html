@@ -16,7 +16,7 @@
     const current = document.getElementById("current").value.trim();
     const newPass = document.getElementById("new").value.trim();
 
-    const res = await fetch("/api/change-password", {
+    const res = await fetch(`api/change-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ current, new: newPass }),
@@ -24,7 +24,7 @@
 
     if (res.ok) {
       alert("비밀번호가 변경되었습니다.");
-      location.href = "/";
+      location.href = "";
     } else {
       alert("비밀번호 변경 실패");
     }

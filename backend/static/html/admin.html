@@ -37,7 +37,7 @@
 
         const redirect_page = document.querySelector("input[name='redirect_target']").value.trim();
   
-        const res = await fetch("/api/admin", {
+        const res = await fetch(`api/admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ users, redirect_page }),

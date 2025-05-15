@@ -8,7 +8,7 @@ use headers::Cookie as HeaderCookie;
 use jsonwebtoken::{decode, encode, errors::Error as JwtError, Header, DecodingKey, EncodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use cookie::{time, Cookie, SameSite};
-use crate::auth::storage::get_user_by_name;
+use crate::{auth::storage::get_user_by_name, handlers::redirec_to_page};
 
 use crate::config::JWT_SECRET;
 
@@ -85,11 +85,11 @@ pub async fn require_jwt_or_redirect(req: Request<axum::body::Body>, next: Next)
     let cookies = req.headers().typed_get::<HeaderCookie>();
     let token = match cookies.and_then(|c| c.get("token").map(|s| s.to_string())) {
         Some(t) => t,
-        None => return Ok(Redirect::to("/login").into_response()),
+        None => return Ok(redirec_to_page("login").into_response()),
     };
 
     if decode_jwt(&token).is_err() {
-        return Ok(Redirect::to("/login").into_response());
+        return Ok(redirec_to_page("login").into_response());
     }
 
     Ok(next.run(req).await)

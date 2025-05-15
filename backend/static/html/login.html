@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <base href="{base_url}/" />
   <meta charset="UTF-8" />
   <title>로그인</title>
   <style>
@@ -16,7 +17,7 @@
     <input type="password" name="password" id="password" placeholder="비밀번호" required />
     <button type="submit">로그인</button>
   </form>
-  <p>계정이 없으신가요? <a href="/signup">회원가입</a></p>
+  <p>계정이 없으신가요? <a href="signup">회원가입</a></p>
 
   <script>
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
@@ -25,7 +26,7 @@
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
 
-      const res = await fetch("/api/login", {
+      const res = await fetch(`api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -34,7 +35,7 @@
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem("token", data.token);
-        location.href = "/";
+        location.href = "";
       } else {
         alert("로그인 실패");
       }

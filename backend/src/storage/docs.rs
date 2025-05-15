@@ -62,22 +62,28 @@ fn create_new_doc(name: &str, content: &str, tags: &[String], editor: &str) -> i
 
 fn edit_existing_doc(name: &str, new_content: &str, tags: &[String], editor: &str) -> io::Result<()> {
     let old_content = load_doc(name).unwrap_or_default();
+    let content_changed = old_content != new_content;
 
-    if old_content == new_content {
+    let meta_result = load_doc_meta(name);
+
+    let tag_changed = match &meta_result {
+        Ok(meta) => &meta.tags != tags,
+        Err(_) => true,
+    };
+
+    if !content_changed && !tag_changed {
         return Ok(());
     }
 
-    fs::write(doc_path(name), new_content)?;
+    if content_changed {
+        fs::write(doc_path(name), new_content)?;
+    }
 
-    let meta = match load_doc_meta(name) {
-        Ok(mut meta) => {
-            meta.record_edit(editor, Some(&old_content), Some(new_content), tags);
-            meta
-        }
-        Err(_) => {
-            DocMeta::new(tags, editor)
-        }
-    };
+    let mut meta = meta_result.unwrap_or_else(|_| DocMeta::new(tags, editor));
+    if content_changed || tag_changed {
+        println!("{:?}", tags);
+        meta.record_edit(editor, Some(&old_content), Some(new_content), tags);
+    }
 
     save_doc_meta(name, &meta)
 }

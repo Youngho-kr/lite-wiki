@@ -1,4 +1,4 @@
-use crate::{auth::User, storage::*};
+use crate::{auth::User, config::BASE_URL, storage::*};
 use std::collections::HashMap;
 
 fn render_template(template_name: &str, vars: &HashMap<&str, String>) -> String {
@@ -15,6 +15,7 @@ fn render_template(template_name: &str, vars: &HashMap<&str, String>) -> String 
 fn render_layout(content: &str, username: &str) -> String {
     let mut vars = HashMap::new();
 
+    vars.insert("base_url", BASE_URL.clone());
     vars.insert("content", content.to_string());
     vars.insert("username", username.to_string());
 
@@ -102,7 +103,7 @@ pub fn render_search_result_html(
 ) -> String {
     let items: String = results
     .iter()
-    .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
+    .map(|name| format!(r#"<li><a href="{}">{}</a></li>"#, name, name))
     .collect();
 
     let mut vars = HashMap::new();
@@ -137,7 +138,7 @@ pub fn render_template_list_html(
     let items = template_names
     .iter()
     .map(|name| {
-        let link = format!("/create?template={}", name);
+        let link = format!("create?template={}", name);
         format!(r#"<li>{} — <a href="{}">이 템플릿으로 문서 만들기</a></li>"#, name, link)
     })
     .collect::<Vec<_>>()
@@ -169,7 +170,7 @@ pub fn render_doc_list_html(
     doc_names.sort();
     let items = doc_names
     .iter()
-    .map(|name| format!(r#"<li><a href="/{}">{}</a></li>"#, name, name))
+    .map(|name| format!(r#"<li><a href="{}">{}</a></li>"#, name, name))
     .collect::<Vec<_>>()
     .join("\n");
 
@@ -187,7 +188,7 @@ pub fn render_search_tag_html(
 ) -> String {
     docs.sort();
     let items = docs.iter()
-        .map(|doc| format!(r#"<li><a href="/{}">{}</a></li>"#, doc, doc))
+        .map(|doc| format!(r#"<li><a href="{}">{}</a></li>"#, doc, doc))
         .collect::<Vec<_>>()
         .join("\n");
 
@@ -204,7 +205,7 @@ pub fn render_all_tags_html(
     username: &str,
 ) -> String {
     let items = tags.iter()
-        .map(|tag| format!(r#"<li><a href="/tags/{}" class="tag">#{}</a></li>"#, tag, tag))
+        .map(|tag| format!(r#"<li><a href="tags/{}" class="tag">#{}</a></li>"#, tag, tag))
         .collect::<Vec<_>>()
         .join("\n");
 
@@ -218,18 +219,18 @@ pub fn render_all_tags_html(
 pub fn render_login_page_html() -> String {
     let template = load_template_file("login.html").unwrap_or_default();
 
-    template
+    template.replace(&format!("{{base_url}}"), &BASE_URL)
 }
 
 pub fn render_signup_page_html() -> String {
     let template = load_template_file("signup.html").unwrap_or_default();
 
-    template
+    template.replace(&format!("{{base_url}}"), &BASE_URL)
 }
 
 fn render_viewer_tags(tags: &[String]) -> String {
     tags.iter()
-        .map(|tag| format!(r#"<a href="/tags/{}" class="tag">#{}</a>"#, tag, tag))
+        .map(|tag| format!(r#"<a href="tags/{}" class="tag">#{}</a>"#, tag, tag))
         .collect::<Vec<_>>()
         .join(" ")
 }
