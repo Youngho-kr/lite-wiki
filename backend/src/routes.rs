@@ -45,7 +45,6 @@ pub fn create_routes() -> Router {
         .route("/user_info", get(render_user_info_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/admin", get(render_admin_page).layer(middleware::from_fn(require_admin_or_redirect)))
         .route("/docs", get(render_doc_list).layer(middleware::from_fn(require_jwt_or_redirect)))
-        // .route("/templates", get(render_template_list).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/search", get(render_search_results).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/create", get(create_doc_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/tags", get(render_all_tags).layer(middleware::from_fn(require_jwt_or_redirect)))

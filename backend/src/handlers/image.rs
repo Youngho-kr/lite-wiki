@@ -8,7 +8,7 @@ use mime_guess::MimeGuess;
 use serde::Deserialize;
 use tokio::fs;
 
-use crate::{config::BASE_URL, storage::{file, uploads_path, ALLOWED_EXTENSIONS}};
+use crate::{storage::{file, uploads_path, ALLOWED_EXTENSIONS}};
 
 #[derive(Deserialize)]
 pub struct UploadParams {
@@ -58,7 +58,7 @@ pub async fn upload_image(
         }
     }
 
-    Ok(format!("{}/images/{}", *BASE_URL, safe_filename))
+    Ok(format!("/images/{}", safe_filename))
 }
 
 pub async fn serve_image(Path(filename): Path<String>) -> impl IntoResponse {

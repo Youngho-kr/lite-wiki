@@ -1,4 +1,3 @@
-use lite_wiki_backend::config::BASE_URL;
 use tokio::net::TcpListener;
 use tracing::{error, info};
 use tracing_subscriber;
@@ -25,11 +24,9 @@ async fn main() {
 
     // Bind to address
     let bind_address = "0.0.0.0:3000";
-    let base_url = BASE_URL.clone();
-
     match TcpListener::bind(&bind_address).await {
         Ok(listner) => {
-            info!("Lite Wiki is running at http://{}", &base_url);
+            info!("Lite Wiki is running at {}", bind_address);
             if let Err(e) = axum::serve(listner, app).await {
                 error!("Server error: {}", e);
             }

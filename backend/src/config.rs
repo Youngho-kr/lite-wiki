@@ -8,7 +8,6 @@ pub static UPLOADS_PATH: Lazy<String> = Lazy::new(|| env_required("UPLOADS_PATH"
 pub static USER_DB_PATH: Lazy<String> = Lazy::new(|| env_required("USER_DB_PATH"));
 pub static SETTINGS_PATH: Lazy<String> = Lazy::new(|| env_required("SETTINGS_PATH"));
 pub static JWT_SECRET: Lazy<String> = Lazy::new(|| env_required("JWT_SECRET_KEY"));
-pub static BASE_URL: Lazy<String> = Lazy::new(|| env_required("BASE_URL"));
 
 fn env_required(key: &str) -> String {
     env::var(key).unwrap_or_else(|_| panic!("Mssing required environment variable: {}", key))

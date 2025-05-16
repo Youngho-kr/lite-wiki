@@ -1,4 +1,4 @@
-use crate::{auth::User, config::BASE_URL, storage::*};
+use crate::{auth::User, storage::*};
 use std::collections::HashMap;
 
 fn render_template(template_name: &str, vars: &HashMap<&str, String>) -> String {
@@ -15,7 +15,6 @@ fn render_template(template_name: &str, vars: &HashMap<&str, String>) -> String 
 fn render_layout(content: &str, username: &str) -> String {
     let mut vars = HashMap::new();
 
-    vars.insert("base_url", BASE_URL.clone());
     vars.insert("content", content.to_string());
     vars.insert("username", username.to_string());
 
@@ -219,13 +218,13 @@ pub fn render_all_tags_html(
 pub fn render_login_page_html() -> String {
     let template = load_template_file("login.html").unwrap_or_default();
 
-    template.replace(&format!("{{base_url}}"), &BASE_URL)
+    template
 }
 
 pub fn render_signup_page_html() -> String {
     let template = load_template_file("signup.html").unwrap_or_default();
 
-    template.replace(&format!("{{base_url}}"), &BASE_URL)
+    template
 }
 
 fn render_viewer_tags(tags: &[String]) -> String {

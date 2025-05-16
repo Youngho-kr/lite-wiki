@@ -8,7 +8,6 @@ services:
     ports:
       - "3001:3000"  # 외부 포트:컨테이너 포트
     environment:
-      BASE_URL: http://localhost/wiki  # 실제 도메인으로 수정
       JWT_SECRET_KEY: your_secret_key   # 반드시 강력한 비밀키로 변경
       DOCS_PATH: /data/docs
       UPLOADS_PATH: /data/uploads
