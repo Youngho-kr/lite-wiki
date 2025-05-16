@@ -13,8 +13,8 @@ pub fn docs_dir_path() -> PathBuf {
     DOCS_PATH.clone().into()
 }
 
-pub fn uploads_path(name: &str, extension: &str) -> PathBuf {
-    uploads_dir_path().join(format!("{name},{extension}"))
+pub fn uploads_path(name: &str) -> PathBuf {
+    uploads_dir_path().join(name)
 }
 
 pub fn uploads_dir_path() -> PathBuf {

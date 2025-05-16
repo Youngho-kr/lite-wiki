@@ -16,7 +16,9 @@ async fn main() {
     check_environment_directories();
 
     // Initialize tracing subscriber (logger)
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
 
     // Create the application routes
     let app = create_routes();

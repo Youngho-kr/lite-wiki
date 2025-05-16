@@ -8,7 +8,7 @@ use mime_guess::MimeGuess;
 use serde::Deserialize;
 use tokio::fs;
 
-use crate::storage::{file, ALLOWED_EXTENSIONS};
+use crate::{config::BASE_URL, storage::{file, uploads_path, ALLOWED_EXTENSIONS}};
 
 #[derive(Deserialize)]
 pub struct UploadParams {
@@ -19,15 +19,23 @@ pub async fn upload_image(
     Query(params): Query<UploadParams>,
     mut multipart: Multipart
 ) -> Result<String, StatusCode> {
-    let field = multipart.next_field().await.map_err(|_| StatusCode::BAD_REQUEST)?
-        .ok_or(StatusCode::BAD_REQUEST)?;
+    println!("upload_image");
 
+    let field = match multipart.next_field().await {
+        Ok(Some(f)) => f,
+        Ok(None) => return  Err(StatusCode::BAD_REQUEST),
+        Err(_) => return Err(StatusCode::BAD_REQUEST)
+    };
+    
     let original_filename = field.file_name().unwrap_or("file");
-    let extension = std::path::Path::new(original_filename)
+    let extension = match std::path::Path::new(original_filename)
         .extension()
         .and_then(|ext| ext.to_str())
         .map(|ext| ext.to_lowercase())
-        .ok_or(StatusCode::UNSUPPORTED_MEDIA_TYPE)?;
+    {
+        Some(ext) => ext,
+        None => return Err(StatusCode::UNSUPPORTED_MEDIA_TYPE)
+    };
 
     if !ALLOWED_EXTENSIONS.contains(&&extension.as_str()) {
         return Err(StatusCode::UNSUPPORTED_MEDIA_TYPE);
@@ -35,20 +43,27 @@ pub async fn upload_image(
 
     let safe_filename = file::generate_filename(params.filename.as_deref(), &extension);
 
-    let data = field.bytes().await.map_err(|_| StatusCode::BAD_REQUEST)?;
-    file::save_file(&safe_filename, &data)
-        .await
-        .map_err(|err| if err.kind() == std::io::ErrorKind::AlreadyExists {
-            StatusCode::CONFLICT
+    let data = match field.bytes().await {
+        Ok(bytes) => bytes,
+        Err(_) => return Err(StatusCode::BAD_REQUEST)
+    };
+    
+    if let Err(err) = file::save_file(&safe_filename, &data).await
+    {
+        if err.kind() == std::io::ErrorKind::AlreadyExists {
+            return Err(StatusCode::CONFLICT);
         } else {
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+            println!("왜이래");
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    }
 
-    Ok(format!("/api/images/{}", safe_filename))
+    Ok(format!("{}/images/{}", *BASE_URL, safe_filename))
 }
 
 pub async fn serve_image(Path(filename): Path<String>) -> impl IntoResponse {
-    let filepath = format!("data/uploads/{}", filename);
+
+    let filepath = uploads_path(&filename);
 
     match fs::read(&filepath).await {
         Ok(file_bytes) => {

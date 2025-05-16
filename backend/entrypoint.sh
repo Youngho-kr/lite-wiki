@@ -1,23 +1,21 @@
 #!/bin/bash
 set -e
 
+# 기본 데이터 복사 (없을 때만)
+if [ ! -f /data/users.json ]; then
+    cp /lite-wiki/data/users.json /data/users.json
+fi
 
-if [ ! -f /data/.initialized ]; then
+if [ ! -f /data/settings.json ]; then
+    cp /lite-wiki/data/settings.json /data/settings.json
+fi
 
-    # 초기 docs 복사
-    cp -r /lite-wiki/data/docs/* /data/docs/ 2>/dev/null || true
+if [ ! "$(ls -A /data/docs)" ]; then
+    cp -r /lite-wiki/data/docs/* /data/docs/
+fi
 
-    # 초기 uploads 복사
-    cp -r /lite-wiki/data/uploads/* /data/uploads/ 2>/dev/null || true
-
-    [ ! -f /data/users.json ] && cp /lite-wiki/data/users.json /data/users.json 2>/dev/null || true
-    [ ! -f /data/settings.json ] && cp /lite-wiki/data/settings.json /data/settings.json 2>/dev/null || true
-
-    # 초기화 완료 마커 생성
-    touch /data/.initialized
-    echo "Initialization complete."
-else
-    echo "Data volume already initialized. Skipping initial data copy."
+if [ ! "$(ls -A /data/uploads)" ]; then
+    cp -r /lite-wiki/data/uploads/* /data/uploads/
 fi
 
 exec lite-wiki

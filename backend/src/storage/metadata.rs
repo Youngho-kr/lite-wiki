@@ -46,7 +46,6 @@ impl DocMeta {
             summary.push("edit");
         }
         if self.tags != tags {
-            println!("tag changed");
             summary.push("tag changed");
             self.tags = tags.to_vec();
         }

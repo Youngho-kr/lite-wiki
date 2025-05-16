@@ -81,7 +81,6 @@ fn edit_existing_doc(name: &str, new_content: &str, tags: &[String], editor: &st
 
     let mut meta = meta_result.unwrap_or_else(|_| DocMeta::new(tags, editor));
     if content_changed || tag_changed {
-        println!("{:?}", tags);
         meta.record_edit(editor, Some(&old_content), Some(new_content), tags);
     }
 

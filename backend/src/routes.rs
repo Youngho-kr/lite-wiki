@@ -18,7 +18,7 @@ pub fn create_routes() -> Router {
                 .on_response(trace::DefaultOnResponse::new().level(Level::INFO))
         )
         // 파일 크기
-        .layer(RequestBodyLimitLayer::new(10 * 1024 * 1024)) // 10MB limit
+        .layer(RequestBodyLimitLayer::new(100 * 1024 * 1024)) // 100MB limit
         // css
         .nest_service("/static", ServeDir::new("static"))
         // Auth
@@ -37,6 +37,7 @@ pub fn create_routes() -> Router {
         .route("/api/tags/:name", get(get_tags).layer(middleware::from_fn(require_jwt)))
         .route("/api/images", post(upload_image).layer(middleware::from_fn(require_jwt)))
         .route("/api/images/:filename", get(serve_image).layer(middleware::from_fn(require_jwt)))
+        .route("/images/:filename", get(serve_image).layer(middleware::from_fn(require_jwt)))
         // Web 뷰어
         .route("/", get(redirect_to_root))
         .route("/login", get(render_login_page))
