@@ -17,6 +17,8 @@ services:
     volumes:
       - ./data/docs:/data/docs
       - ./data/uploads:/data/uploads
+      - ./data/users.json:/data/users.json
+      - ./data/settings.json:/data/settings.json
     restart: unless-stopped
   
 volumes:
