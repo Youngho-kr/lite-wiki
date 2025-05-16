@@ -17,11 +17,14 @@ target/
 #.idea/
 
 # Docs
-data/docs/*
-!data/.gitkeep
+/data/docs/*
 
-data/templates/*
-!data/.gitkeep
+!/data/docs/
+!data/docs/lite-wiki.md
+
+/data/uploads/*
+!/data/uploads/
+!/data/uploads/.gitkeep
 
 data_test/
 
