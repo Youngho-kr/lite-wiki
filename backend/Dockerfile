@@ -12,7 +12,7 @@ COPY --from=builder /usr/src/app/target/release/lite-wiki-backend /usr/local/bin
 
 COPY static ./static
 COPY data ./lite-wiki/data
-COPY entrypoint.sh ./entrypoint.sh
+COPY entrypoint.sh /lite-wiki/entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
