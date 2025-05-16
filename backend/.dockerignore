@@ -12,8 +12,3 @@ target/
 .DS_Store
 .vscode/
 .idea/
-
-# Data
-data/docs/*
-data/templates/*
-!data/docs/index.md
