@@ -16,7 +16,7 @@
     const current = document.getElementById("current").value.trim();
     const newPass = document.getElementById("new").value.trim();
 
-    const res = await fetch(`api/change-password`, {
+    const res = await fetch(`/api/change-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ current, new: newPass }),

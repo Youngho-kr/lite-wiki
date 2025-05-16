@@ -7,6 +7,6 @@ pub async fn logout() -> impl IntoResponse {
 
     (
         [(SET_COOKIE, remove_cookie.to_string())],
-        redirec_to_page("name")
+        redirec_to_page("/")
     )
 }

@@ -76,7 +76,7 @@
       }
 
       try {
-        const check = await fetch(`api/docs/check/` + encodeURIComponent(title));
+        const check = await fetch(`/api/docs/check/` + encodeURIComponent(title));
         if (check.status === 200) {
           alert("이미 존재하는 문서 제목입니다.");
           return;
@@ -85,7 +85,7 @@
         const content = editor.getMarkdown();
         const tags = collectTags();
 
-        const res = await fetch(`api/docs/` + encodeURIComponent(title), {
+        const res = await fetch(`/api/docs/` + encodeURIComponent(title), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content, tags }),

@@ -1,5 +1,4 @@
 use axum::response::Redirect;
-use tracing::info;
 
 use crate::config::current_redirect_page;
 
