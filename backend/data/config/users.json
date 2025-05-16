@@ -1,0 +1,8 @@
+[
+    {
+      "username": "admin",
+      "password_hash": "$argon2id$v=19$m=19456,t=2,p=1$tCayDS0AjTPf1kGmnnDXlQ$IQWbhsSAOw3vddU68nfqYcOwbksxu5Z+jC3BHbq8S8k",
+      "is_admin": true,
+      "is_authorized": true
+    }
+  ]

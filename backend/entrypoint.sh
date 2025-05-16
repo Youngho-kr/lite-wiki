@@ -1,13 +1,21 @@
 #!/bin/bash
 set -e
 
+#!/bin/bash
+set -e
+
 # 기본 데이터 복사 (없을 때만)
-if [ ! -f /data/users.json ]; then
-    cp /lite-wiki/data/users.json /data/users.json
+
+# users.json
+if [ ! -f /data/config/users.json ]; then
+    mkdir -p /data/config
+    cp /lite-wiki/data/config/users.json /data/config/users.json
 fi
 
-if [ ! -f /data/settings.json ]; then
-    cp /lite-wiki/data/settings.json /data/settings.json
+# settings.json
+if [ ! -f /data/config/settings.json ]; then
+    mkdir -p /data/config
+    cp /lite-wiki/data/config/settings.json /data/config/settings.json
 fi
 
 if [ -d /lite-wiki/data/docs ] && [ -z "$(ls -A /data/docs 2>/dev/null)" ]; then
