@@ -1,5 +1,6 @@
 # Lite Wiki
 > **Lite Wiki**는 Rust로 작성한 경량화 마크다운 기반 웹 위키 시스템입니다.
+> 설정이 간편하고, 마크다운 문서 관리와 이미지 업로드, 태그 분류, 문서 변경 내역 조회 등을 지원합니다.
 - 백엔드: Rust
 - 에디터: Toast UI Editor
 - 데이터 저장: 로컬 파일 시스템 (.md)
@@ -45,6 +46,8 @@ cd lite-wiki
 ### 3. 환경 변수 및 포트 설정
 `docker-compose.yml` 파일의 환경변수 값 설정
 ```yaml
+ports:
+      - "3001:3000"                     # 사용 도메인으로 수정 (e.g. 외부 포트 8080 사용시: "8080:3000")
 environment:
       BASE_URL: 0.0.0.0:3000            # 실제 도메인으로 수정
       JWT_SECRET_KEY: your_secret_key   # 반드시 강력한 비밀키로 변경
@@ -60,6 +63,41 @@ environment:
 ```bash
 docker compose up --build -d
 ```
+
+### 5. NGINX 설정 (선택)
+```nginx
+server {
+      listen 80;
+      server_name localhost;  # 실제 도메인 설정 시 변경 (e.g., wiki.example.com)
+
+	client_max_body_size 100M;
+
+      # Static Files (CSS, JS, Images)
+      location /wiki/static/ {
+            proxy_pass http://localhost:3001/static/;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Application Proxy
+      location /wiki/ {
+            proxy_pass http://localhost:3001/;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_request_buffering off;
+
+            rewrite ^/wiki/(.*)$ /$1 break;
+      }
+    }
+```
+
+
 ### 5. 웹 접속
 `BASE_URL`에 작성한 링크로 접속
 
@@ -76,3 +114,7 @@ docker compose up --build -d
 | `/문서명` | 문서 내용 조회 |
 | `/edit/문서명` | 문서 편집 |
 | `/random` | 무작위 문서 이동 |
+
+### 6. 사용자 회원가입
+새로운 사용자 회원가입 후 관리자 계정으로 `/admin` 접속 후 권한 부여
+
