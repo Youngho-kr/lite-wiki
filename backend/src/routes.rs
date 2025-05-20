@@ -39,9 +39,11 @@ pub fn create_routes() -> Router {
         .route("/api/images/:filename", get(serve_image).layer(middleware::from_fn(require_jwt)))
         .route("/images/:filename", get(serve_image).layer(middleware::from_fn(require_jwt)))
         // Web 뷰어
-        .route("/", get(redirect_to_root))
+        .route("/", get(handle_root))
         .route("/login", get(render_login_page))
         .route("/signup", get(render_signup_page))
+        .route("/auth/github", get(github_login))
+        .route("/auth/github/callback", get(github_callback))
         .route("/user_info", get(render_user_info_page).layer(middleware::from_fn(require_jwt_or_redirect)))
         .route("/admin", get(render_admin_page).layer(middleware::from_fn(require_admin_or_redirect)))
         .route("/docs", get(render_doc_list).layer(middleware::from_fn(require_jwt_or_redirect)))

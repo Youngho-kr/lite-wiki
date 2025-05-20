@@ -13,6 +13,11 @@ services:
       UPLOADS_PATH: /data/uploads
       USER_DB_PATH: /data/config/users.json
       SETTINGS_PATH: /data/config/settings.json
+      # GitHub OAuth 설정
+      GITHUB_CLIENT_ID: Ov23lihUNKbcKywH2mXA
+      GITHUB_CLIENT_SECRET: ff6ed1c60958509e0e5b41aa75f3dff4ac9d5dee
+      GITHUB_ORG: your_organization_name
+      GITHUB_CALLBACK_URL: http://localhost/auth/github/callback
     volumes:
       - ./data/docs:/data/docs
       - ./data/uploads:/data/uploads

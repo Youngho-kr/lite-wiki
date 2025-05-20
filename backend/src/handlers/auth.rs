@@ -17,6 +17,10 @@ pub async fn handle_logout() -> impl IntoResponse {
     logout().await
 }
 
+pub async fn handle_github_login() -> impl IntoResponse {
+
+}
+
 pub async fn handle_change_password(
     AuthUser(username): AuthUser,
     Json(payload): Json<ChangePasswordReqeust>,
@@ -34,7 +38,7 @@ pub async fn handle_change_password(
 
 pub async fn render_login_page(req: Request<axum::body::Body>) -> impl IntoResponse {
     if extract_valid_token(req.headers()).is_some() {
-        return redirect_to_root().await.into_response();
+        return redirect_to_root().into_response();
     }
 
     Html(render_login_page_html()).into_response()
