@@ -44,3 +44,5 @@ uuid = { version = "1.8", features = ["v4", "fast-rng"] }
 mime_guess = "2.0"
 # 이미지 변환
 regex = "1.10"
+# HTTP 클라이언트
+reqwest = { version = "0.12", features = ["json"] }

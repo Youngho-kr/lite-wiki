@@ -9,6 +9,11 @@ pub static USER_DB_PATH: Lazy<String> = Lazy::new(|| env_required("USER_DB_PATH"
 pub static SETTINGS_PATH: Lazy<String> = Lazy::new(|| env_required("SETTINGS_PATH"));
 pub static JWT_SECRET: Lazy<String> = Lazy::new(|| env_required("JWT_SECRET_KEY"));
 
+pub static GITHUB_CLIENT_ID: Lazy<String> = Lazy::new(|| env_required("GITHUB_CLIENT_ID"));
+pub static GITHUB_CLIENT_SECRET: Lazy<String> = Lazy::new(|| env_required("GITHUB_CLIENT_SECRET"));
+pub static GITHUB_ORG: Lazy<String> = Lazy::new(|| env_required("GITHUB_ORG"));
+pub static GITHUB_CALLBACK_URL: Lazy<String> = Lazy::new(|| env_required("GITHUB_CALLBACK_URL"));
+
 fn env_required(key: &str) -> String {
     env::var(key).unwrap_or_else(|_| panic!("Mssing required environment variable: {}", key))
 }

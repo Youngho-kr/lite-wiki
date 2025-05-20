@@ -1,44 +1,31 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>로그인</title>
-  <style>
-    body { font-family: sans-serif; max-width: 400px; margin: auto; padding: 2rem; }
-    input { display: block; margin-bottom: 1rem; width: 100%; padding: 8px; font-size: 1rem; }
-    button { padding: 8px 16px; }
-  </style>
+  <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
-  <h1>로그인</h1>
-  <form id="loginForm">
-    <input type="text" name="username" id="username" placeholder="아이디" required />
-    <input type="password" name="password" id="password" placeholder="비밀번호" required />
-    <button type="submit">로그인</button>
-  </form>
-  <p>계정이 없으신가요? <a href="signup">회원가입</a></p>
-
-  <script>
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      const res = await fetch(`/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem("token", data.token);
-        location.href = "";
-      } else {
-        alert("로그인 실패");
-      }
-    });
-  </script>
+  <div class="auth-container">
+    <h1>로그인</h1>
+    <form class="form" action="/api/login" method="POST">
+      <input type="text" name="username" placeholder="아이디" required />
+      <input type="password" name="password" placeholder="비밀번호" required />
+      <button type="submit">로그인</button>
+    </form>
+    <a class="github-btn" href="/auth/github">
+      <svg class="icon" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 .198a8 8 0 00-2.528 15.592c.4.075.547-.175.547-.388 0-.192-.007-.7-.01-1.375-2.226.483-2.695-1.073-2.695-1.073-.364-.924-.89-1.17-.89-1.17-.727-.497.055-.487.055-.487.803.057 1.226.824 1.226.824.714 1.222 1.873.87 2.33.665.072-.517.28-.87.508-1.07-1.777-.2-3.644-.888-3.644-3.955 0-.874.312-1.59.824-2.15-.083-.202-.357-1.015.078-2.117 0 0 .672-.215 2.2.82a7.65 7.65 0 012.002-.268c.68.003 1.364.092 2.002.268 1.527-1.035 2.198-.82 2.198-.82.437 1.102.163 1.915.08 2.117.513.56.823 1.276.823 2.15 0 3.073-1.87 3.752-3.65 3.95.288.248.543.735.543 1.482 0 1.07-.01 1.93-.01 2.193 0 .215.145.466.55.386A8.001 8.001 0 008 .198z"/>
+      </svg>
+      GitHub로 로그인
+    </a>
+    <div class="link">계정이 없으신가요? <a href="/signup">회원가입</a></div>
+  </div>
 </body>
+<script>
+  const params = new URLSearchParams(location.search);
+  if (params.get("error")) {
+    alert("로그인 실패: " + params.get("error"));
+  }
+</script>
 </html>

@@ -1,20 +1,24 @@
 
-use axum::{http::{Request, StatusCode}, response::{Html, IntoResponse}, Json};
+use axum::{http::{Request, StatusCode}, response::{Html, IntoResponse}, Form, Json};
 use crate::auth::{change_password, extract_valid_token, login, logout, signup, verify_password, AuthUser, ChangePasswordReqeust, LoginRequest, SignUpRequest};
 use crate::handlers::html_render::{render_login_page_html, render_signup_page_html};
 
 use super::{redirect_to_root, render_user_info_html};
 
-pub async fn handle_login(Json(payload): Json<LoginRequest>) -> impl IntoResponse {
+pub async fn handle_login(Form(payload): Form<LoginRequest>) -> impl IntoResponse {
     login(payload).await
 }
 
-pub async fn handle_signup(Json(payload): Json<SignUpRequest>) -> impl IntoResponse {
+pub async fn handle_signup(Form(payload): Form<SignUpRequest>) -> impl IntoResponse {
     signup(payload).await
 }
 
 pub async fn handle_logout() -> impl IntoResponse {
     logout().await
+}
+
+pub async fn handle_github_login() -> impl IntoResponse {
+
 }
 
 pub async fn handle_change_password(
@@ -34,7 +38,7 @@ pub async fn handle_change_password(
 
 pub async fn render_login_page(req: Request<axum::body::Body>) -> impl IntoResponse {
     if extract_valid_token(req.headers()).is_some() {
-        return redirect_to_root().await.into_response();
+        return redirect_to_root().into_response();
     }
 
     Html(render_login_page_html()).into_response()

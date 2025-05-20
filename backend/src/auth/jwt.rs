@@ -1,11 +1,12 @@
 use axum::{
-    http::{HeaderMap, Request, StatusCode},
+    http::{HeaderMap, Request, StatusCode, HeaderValue},
     middleware::Next,
-    response::{IntoResponse, Redirect, Response},
+    response::{IntoResponse, Redirect, Response}
 };
 use headers::HeaderMapExt;
 use headers::Cookie as HeaderCookie;
 use jsonwebtoken::{decode, encode, errors::Error as JwtError, Header, DecodingKey, EncodingKey, Validation};
+use reqwest::header::SET_COOKIE;
 use serde::{Deserialize, Serialize};
 use cookie::{time, Cookie, SameSite};
 use crate::{auth::storage::get_user_by_name, handlers::redirec_to_page};
@@ -52,6 +53,16 @@ pub fn build_jwt_cookie(token: &str) -> Cookie {
     cookie.set_secure(secure);
     cookie.set_same_site(SameSite::Lax);
     cookie
+}
+
+pub fn respond_with_token_headers(username: &str) -> HeaderMap {
+    let token = create_jwt(username).unwrap();
+    let cookie = build_jwt_cookie(&token);
+
+    let mut headers = HeaderMap::new();
+    headers.insert(SET_COOKIE, HeaderValue::from_str(&cookie.to_string()).unwrap());
+
+    headers
 }
 
 pub fn build_jwt_removal_cooke() -> Cookie<'static> {

@@ -1,8 +1,8 @@
-use axum::{http::{header::SET_COOKIE, HeaderMap, HeaderValue, StatusCode}, response::IntoResponse, Json};
+use axum::{http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-use crate::auth::{build_jwt_cookie, create_jwt, verify_password};
+use crate::{auth::{respond_with_token_headers, verify_password}, handlers::redirect_to_root};
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
@@ -12,7 +12,7 @@ pub struct LoginRequest {
 
 #[derive(Serialize)]
 pub struct LoginResponse {
-    token: String,
+    pub token: String,
 }
 
 pub async fn login(payload: LoginRequest) -> impl IntoResponse {
@@ -31,14 +31,9 @@ pub async fn login(payload: LoginRequest) -> impl IntoResponse {
 
     info!("로그인 성공: {}", user.username);
 
-    let token = create_jwt(&user.username).unwrap();
-    let cookie = build_jwt_cookie(&token);
+    let headers = respond_with_token_headers(&user.username);
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        SET_COOKIE,
-        HeaderValue::from_str(&cookie.to_string()).unwrap(),
-    );
+    let redirect = redirect_to_root();
 
-    (headers, Json(LoginResponse { token })).into_response()
+    (headers, redirect).into_response()
 }
