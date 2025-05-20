@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use axum::{extract::Query, response::{IntoResponse, Redirect}};
-use reqwest::{Client, StatusCode};
+use reqwest::StatusCode;
 use serde::Deserialize;
 
 use tracing::{error, info};
