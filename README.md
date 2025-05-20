@@ -47,17 +47,23 @@ cd lite-wiki
 `docker-compose.yml` 파일의 환경변수 값 설정
 ```yaml
 ports:
-      - "3001:3000"                     # 사용 도메인으로 수정 (e.g. 외부 포트 8080 사용시: "8080:3000")
+      - "3001:3000"                     # 실제 사용할 포트 (e.g. 외부 포트 8080 사용시: "8080:3000")
 environment:
-      BASE_URL: 0.0.0.0:3000            # 실제 도메인으로 수정
       JWT_SECRET_KEY: your_secret_key   # 반드시 강력한 비밀키로 변경
       DOCS_PATH: /data/docs
       UPLOADS_PATH: /data/uploads
       USER_DB_PATH: /data/users.json
       SETTINGS_PATH: /data/settings.json
+
+      GITHUB_CLIENT_ID: github_client_id
+      GITHUB_CLIENT_SECRET: github_client_secret
+      GITHUB_ORG: github_org_name
+      GITHUB_CALLBACK_URL: BASE_URL/auth/github/callback
 ```
-- `BASE_URL`: 실제 도메인으로 설정
 - `JWT_SECRET_KEY`: **반드시** 강력한 키로 수정
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_ORG` 각각 github organization 값으로 설정
+- `GITHUB_CALLBACK_URL`은 http 또는 https 부터 `BASE_URL`/auth/github/callback 형태로 작성
+  - github organization의 callback 링크와 정확히 일치해야 함
 
 ### 4. Docker 실행 
 ```bash
@@ -117,4 +123,4 @@ server {
 
 ### 6. 사용자 회원가입
 새로운 사용자 회원가입 후 관리자 계정으로 `/admin` 접속 후 권한 부여
-
+Github 로그인 시에는 권한 부여 없이 접속 가능

@@ -14,15 +14,17 @@ services:
       USER_DB_PATH: /data/config/users.json
       SETTINGS_PATH: /data/config/settings.json
       # GitHub OAuth 설정
-      GITHUB_CLIENT_ID: Ov23lihUNKbcKywH2mXA
-      GITHUB_CLIENT_SECRET: ff6ed1c60958509e0e5b41aa75f3dff4ac9d5dee
-      GITHUB_ORG: your_organization_name
-      GITHUB_CALLBACK_URL: http://localhost/auth/github/callback
+      GITHUB_CLIENT_ID: github_client_id
+      GITHUB_CLIENT_SECRET: github_client_secret
+      GITHUB_ORG: github_org_name
+      GITHUB_CALLBACK_URL: http://localhost:3001/auth/github/callback
     volumes:
       - ./data/docs:/data/docs
       - ./data/uploads:/data/uploads
       - ./data/config:/data/config
     restart: unless-stopped
+    dns:
+      - 8.8.8.8
   
 volumes:
   litewiki-data:

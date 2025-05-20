@@ -1,8 +1,8 @@
 use argon2::{Argon2, PasswordHasher};
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::response::IntoResponse;
 use password_hash::{rand_core::OsRng, SaltString};
 use serde::Deserialize;
-use crate::auth::{User, add_user};
+use crate::{auth::{add_user, User}, handlers::redirec_to_page};
 
 #[derive(Deserialize)]
 pub struct SignUpRequest {
@@ -26,5 +26,5 @@ pub async fn signup(payload: SignUpRequest) -> impl IntoResponse {
 
     add_user(new_user).unwrap();
 
-    (StatusCode::CREATED, "User created").into_response()
+    redirec_to_page("login")
 }

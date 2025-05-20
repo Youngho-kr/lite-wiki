@@ -33,5 +33,7 @@ pub async fn login(payload: LoginRequest) -> impl IntoResponse {
 
     let headers = respond_with_token_headers(&user.username);
 
-    headers.into_response()
+    let redirect = redirect_to_root();
+
+    (headers, redirect).into_response()
 }

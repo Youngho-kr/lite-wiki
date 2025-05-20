@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use tracing::{error, info};
 
-use crate::{auth::respond_with_token_headers, config::{GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_ORG}, handlers::redirect_to_root};
+use crate::{auth::respond_with_token_headers, config::{GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_ORG}, handlers::{redirec_to_page, redirect_to_root}};
 
 
 
@@ -20,7 +20,7 @@ pub async fn github_login() -> impl IntoResponse {
     let redirect_uri = &*GITHUB_CALLBACK_URL;
 
     Redirect::to(&format!(
-        "https://github.com/login/oauth/authorize?client_id={}&redirect_uri={}&scope=read:user",
+        "https://github.com/login/oauth/authorize?client_id={}&redirect_uri={}&scope=read:org",
         client_id, redirect_uri
     ))
 }
@@ -35,22 +35,50 @@ pub async fn github_callback(Query(query): Query<GithubQuery>) -> impl IntoRespo
     let client_secret = GITHUB_CLIENT_SECRET.clone();
     let github_org = GITHUB_ORG.clone();
 
-    let client = Client::new();
+    let client = reqwest::Client::builder()
+    .user_agent("lite-wiki")
+    .https_only(true) // 명시적으로 HTTPS만 사용
+    .build()
+    .unwrap();
+
+    // let client = reqwest::Client::builder()
+    // .danger_accept_invalid_certs(true) // 개발 중이라면 허용
+    // .user_agent("lite-wiki")
+    // .build()
+    // .unwrap();
 
     let mut params = HashMap::new();
-    params.insert("clinet_id", &client_id);
-    params.insert("clinet_secret", &client_secret);
-    params.insert("code", &query.code);
+    params.insert("client_id", client_id.as_str());
+    params.insert("client_secret", client_secret.as_str());
+    params.insert("code", query.code.as_str());
+    params.insert("redirect_uri", GITHUB_CALLBACK_URL.as_str());
 
-    let res = client
+    let res = match client
         .post("https://github.com/login/oauth/access_token")
         .header("Accept", "application/json")
+        .header("Content-Type", "application/x-www-form-urlencoded")
         .form(&params)
         .send()
         .await
-        .unwrap();
+    {
+        Ok(res) => res,
+        Err(err) => {
+            error!("Github token 요청 실패: {}", err);
+            return Redirect::to("/login?error=token_request_failed").into_response();
+        }
+    };
 
-    let json: serde_json::Value = res.json().await.unwrap();
+    let json: serde_json::Value = match res.json().await {
+        Ok(j) => j,
+        Err(err) => {
+            error!("Github 응답 파싱 실패: {}", err);
+            return Redirect::to("/login?error=invalid_token_response").into_response();
+        }
+    };
+
+    let scope_info = json.get("scope").and_then(|v| v.as_str()).unwrap_or("none");
+    info!("GitHub token scope: {}", scope_info);
+
     let access_token = json.get("access_token").and_then(|v| v.as_str());
 
     let token =  match access_token {
@@ -62,15 +90,26 @@ pub async fn github_callback(Query(query): Query<GithubQuery>) -> impl IntoRespo
     };
 
     let user_res = client
-            .get("http://api.github.com/user")
+            .get("https://api.github.com/user")
             .header("Authorization", format!("token {}", token))
-            .header("User-Agent", "lite-wiki")
             .send()
             .await
             .unwrap();
 
+    
+    println!("Github /user status: {}", user_res.status());
+
     let user_info: serde_json::Value = user_res.json().await.unwrap();
-    let login = user_info["login"].as_str().unwrap_or("unknown");
+
+    println!("user_info: {:?}", user_info);
+
+    let login = match user_info["login"].as_str() {
+        Some(l) => l,
+        None => {
+            error!("GitHub /user 응답에서 login 필드 없음: {:?}", user_info);
+            return Redirect::to("/login?error=missing_login").into_response();
+        }
+    };
     info!("GitHub Login: {}", login);
 
     let org_res = client
