@@ -96,12 +96,7 @@ pub async fn github_callback(Query(query): Query<GithubQuery>) -> impl IntoRespo
             .await
             .unwrap();
 
-    
-    println!("Github /user status: {}", user_res.status());
-
     let user_info: serde_json::Value = user_res.json().await.unwrap();
-
-    println!("user_info: {:?}", user_info);
 
     let login = match user_info["login"].as_str() {
         Some(l) => l,
