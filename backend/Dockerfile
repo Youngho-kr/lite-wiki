@@ -14,6 +14,8 @@ COPY static ./static
 COPY data /lite-wiki/data
 COPY entrypoint.sh /entrypoint.sh
 
+RUN apt update && apt install -y ca-certificates
+
 RUN chmod +x /entrypoint.sh
 
 VOLUME ["/data/docs", "/data/uploads", "/data"]

@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use tracing::{error, info};
 
-use crate::{auth::respond_with_token_headers, config::{GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_ORG}, handlers::{redirec_to_page, redirect_to_root}};
+use crate::{auth::respond_with_token_headers, config::{GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_ORG}, handlers::redirect_to_root};
 
 
 
