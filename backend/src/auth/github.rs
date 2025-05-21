@@ -37,7 +37,7 @@ pub async fn github_callback(Query(query): Query<GithubQuery>) -> impl IntoRespo
 
     let client = reqwest::Client::builder()
     .user_agent("lite-wiki")
-    .https_only(true) // 명시적으로 HTTPS만 사용
+    .https_only(true)
     .build()
     .unwrap();
 
@@ -75,9 +75,6 @@ pub async fn github_callback(Query(query): Query<GithubQuery>) -> impl IntoRespo
             return Redirect::to("/login?error=invalid_token_response").into_response();
         }
     };
-
-    let scope_info = json.get("scope").and_then(|v| v.as_str()).unwrap_or("none");
-    info!("GitHub token scope: {}", scope_info);
 
     let access_token = json.get("access_token").and_then(|v| v.as_str());
 
