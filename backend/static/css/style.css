@@ -1,8 +1,10 @@
 body {
     font-family: sans-serif;
-    max-width: 720px;
+    /* max-width: 720px; */
+    max-width: 60vw;
     margin: auto;
     padding: 2rem;
+    height: 100%;
   }
   h1 {
     margin-bottom: 1rem;
@@ -111,6 +113,9 @@ a:hover {
   #editor {
     margin-top: 1rem;
     margin-bottom: 1rem;
+    margin: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
   }
   
   #edit-btn {
